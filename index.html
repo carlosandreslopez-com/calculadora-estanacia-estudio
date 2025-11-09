@@ -22,7 +22,7 @@
         background: #64748b; /* slate-500 */
       }
     </style>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.2.0",
@@ -37,10 +37,10 @@
     <div id="root"></div>
     <!--
       Load the app through esm.sh, which fetches directly from GitHub,
-      transpiles TSX, and resolves modules on the fly.
-      This replaces the need for Babel Standalone and importmaps for a multi-file project.
+      transpiles TSX, and resolves all modules (including React) on the fly.
+      The ?v=2 parameter is added to bust caching and ensure the latest version is loaded.
     -->
-    <script type="module" src="https://esm.sh/gh/carlosandreslopez-com/calculadora-estanacia-estudio@main/index.tsx"></script>
+    <script type="module" src="https://esm.sh/gh/carlosandreslopez-com/calculadora-estanacia-estudio@main/index.tsx?v=2"></script>
   <script type="module" src="/index.tsx"></script>
 </body>
 </html>
