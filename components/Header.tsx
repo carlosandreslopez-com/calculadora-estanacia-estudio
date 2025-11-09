@@ -7,7 +7,7 @@ export const Header: React.FC = () => {
         Calculadora de Estancia de Estudiante
       </h1>
       <p className="mt-3 text-lg text-slate-400 max-w-3xl mx-auto">
-        Una calculadora para determinar fechas límite importantes para una solicitud de visa de estudiante basada en la fecha de llegada, la duración de la estancia de turista y los plazos de presentación.
+        Calcula las fechas límite clave para tu visa de estudiante según tu fecha de llegada. Encuentra tu fecha máxima de presentación y los rangos de fechas válidos para el inicio de tu curso.
       </p>
     </header>
   );
