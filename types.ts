@@ -12,7 +12,7 @@ export interface CalculationResult {
   breakdown: BreakdownRow[];
 }
 
-// FIX: Added missing CalculatedStayRecord type which was causing an import error in `services/csvProcessor.ts`.
+// FIX: Add missing CalculatedStayRecord interface
 export interface CalculatedStayRecord {
   no: string;
   id: string;

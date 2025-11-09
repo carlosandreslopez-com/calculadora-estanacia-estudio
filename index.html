@@ -31,6 +31,7 @@
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
   <body class="bg-slate-900">
     <div id="root"></div>
@@ -44,5 +45,6 @@
       script.src = `/index.tsx?v=${Date.now()}`;
       document.body.appendChild(script);
     </script>
-  </body>
+  <script type="module" src="/index.tsx"></script>
+</body>
 </html>
