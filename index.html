@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Stay Duration Calculator</title>
+    <title>Calculadora de Estancia de Estudiante</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       /* For custom scrollbar styling */
@@ -31,16 +31,14 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
   <body class="bg-slate-900">
     <div id="root"></div>
     <!--
-      Load the app through esm.sh, which fetches directly from GitHub,
-      transpiles TSX, and resolves all modules (including React) on the fly.
-      The ?v=2 parameter is added to bust caching and ensure the latest version is loaded.
+      Load the app's main script module. In a real production environment,
+      a build process would replace this with a versioned, bundled file
+      (e.g., index.a1b2c3d4.js) to handle caching automatically.
     -->
-    <script type="module" src="https://esm.sh/gh/carlosandreslopez-com/calculadora-estanacia-estudio@main/index.tsx?v=2"></script>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <script type="module" src="./index.tsx"></script>
+  </body>
 </html>
