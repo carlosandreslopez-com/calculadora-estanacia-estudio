@@ -34,11 +34,11 @@
 </head>
   <body class="bg-slate-900">
     <div id="root"></div>
-    <!--
-      Load the app's main script module. In a real production environment,
-      a build process would replace this with a versioned, bundled file
-      (e.g., index.a1b2c3d4.js) to handle caching automatically.
-    -->
-    <script type="module" src="./index.tsx"></script>
+    <script type="module">
+      // By using a dynamic import with a unique timestamp, we ensure that the
+      // browser always fetches the latest version of the application code,
+      // solving caching issues for users in production without a build step.
+      import(`./index.tsx?v=${Date.now()}`);
+    </script>
   </body>
 </html>
