@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CalculatorIcon, ErrorIcon } from './IconComponents';
+import { CalculatorIcon, ErrorIcon } from './IconComponents.tsx';
 
 interface DataEntryFormProps {
     onCalculate: (arrivalDate: string, stayDuration: number, presentationDeadline: number) => boolean;

@@ -1,4 +1,4 @@
-import type { BreakdownRow, CalculationResult } from '../types';
+import type { BreakdownRow, CalculationResult } from '../types.ts';
 
 // Helper to add days to a date, avoiding timezone issues by working in UTC
 const addDays = (date: Date, days: number): Date => {

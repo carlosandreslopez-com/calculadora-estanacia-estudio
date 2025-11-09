@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import type { CalculationResult } from './types';
-import { ResultsTable } from './components/ResultsTable';
-import { Header } from './components/Header';
-import { DataEntryForm } from './components/DataEntryForm';
-import { calculateStudyStayBreakdown } from './services/calculationService';
+import type { CalculationResult } from './types.ts';
+import { ResultsTable } from './components/ResultsTable.tsx';
+import { Header } from './components/Header.tsx';
+import { DataEntryForm } from './components/DataEntryForm.tsx';
+import { calculateStudyStayBreakdown } from './services/calculationService.ts';
 
 function App() {
   const [result, setResult] = useState<CalculationResult | null>(null);

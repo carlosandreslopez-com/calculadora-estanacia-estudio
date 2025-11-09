@@ -1,6 +1,6 @@
 import React from 'react';
-import type { CalculationResult } from '../types';
-import { RefreshIcon, DocumentIcon, CalendarIcon } from './IconComponents';
+import type { CalculationResult } from '../types.ts';
+import { RefreshIcon, DocumentIcon, CalendarIcon } from './IconComponents.tsx';
 
 interface ResultsTableProps {
   data: CalculationResult | null;

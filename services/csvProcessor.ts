@@ -1,5 +1,4 @@
-
-import type { CalculatedStayRecord } from '../types';
+import type { CalculatedStayRecord } from '../types.ts';
 
 const parseDate = (dateString: string): Date => {
   const parts = dateString.match(/(\d+)\/(\d+)\/(\d+)\s(\d+):(\d+)/);
