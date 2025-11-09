@@ -34,11 +34,15 @@
 </head>
   <body class="bg-slate-900">
     <div id="root"></div>
-    <script type="module">
-      // By using a dynamic import with a unique timestamp, we ensure that the
-      // browser always fetches the latest version of the application code,
-      // solving caching issues for users in production without a build step.
-      import(`./index.tsx?v=${Date.now()}`);
+    <script>
+      // This inline script dynamically creates and injects the main application
+      // script tag. Using an absolute path (`/index.tsx`) and a timestamp
+      // ensures the browser requests the latest, non-cached version and that
+      // the platform's transpiler can correctly locate and process the file.
+      const script = document.createElement('script');
+      script.type = 'module';
+      script.src = `/index.tsx?v=${Date.now()}`;
+      document.body.appendChild(script);
     </script>
   </body>
 </html>
