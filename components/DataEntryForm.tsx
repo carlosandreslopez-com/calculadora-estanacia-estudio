@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { CalculatorIcon, ErrorIcon } from './IconComponents.tsx';
 
 interface DataEntryFormProps {
-    onCalculate: (arrivalDate: string, stayDuration: number, presentationDeadline: number) => boolean;
+    onCalculate: (arrivalDate: string, stayDuration: number) => boolean;
     error: string | null;
     clearError: () => void;
 }
@@ -10,17 +10,14 @@ interface DataEntryFormProps {
 export const DataEntryForm: React.FC<DataEntryFormProps> = ({ onCalculate, error, clearError }) => {
     const [arrivalDate, setArrivalDate] = useState('');
     const [stayDuration, setStayDuration] = useState('90');
-    const [presentationDeadline, setPresentationDeadline] = useState('30');
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const durationAsNumber = parseInt(stayDuration, 10);
-        const deadlineAsNumber = parseInt(presentationDeadline, 10);
 
         onCalculate(
             arrivalDate,
-            isNaN(durationAsNumber) ? 90 : durationAsNumber,
-            isNaN(deadlineAsNumber) ? 30 : deadlineAsNumber
+            isNaN(durationAsNumber) ? 90 : durationAsNumber
         );
     };
     
@@ -34,7 +31,7 @@ export const DataEntryForm: React.FC<DataEntryFormProps> = ({ onCalculate, error
     return (
         <div className="mb-6">
             <h2 className="text-xl font-semibold text-white mb-4">Ingresa los Detalles del Cálculo</h2>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 items-end">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                 <div className="lg:col-span-2">
                     <label htmlFor="arrivalDate" className="block text-sm font-medium text-slate-300 mb-1">Fecha de Llegada</label>
                     <input
@@ -53,18 +50,6 @@ export const DataEntryForm: React.FC<DataEntryFormProps> = ({ onCalculate, error
                         id="stayDuration"
                         value={stayDuration}
                         onChange={handleInputChange(setStayDuration)}
-                        required
-                        min="1"
-                        className="w-full bg-slate-700 border border-slate-600 rounded-md shadow-sm px-3 py-2 text-white focus:outline-none focus:ring-sky-500 focus:border-sky-500"
-                    />
-                </div>
-                <div className="lg:col-span-2">
-                    <label htmlFor="presentationDeadline" className="block text-sm font-medium text-slate-300 mb-1">Plazo de Presentación (días)</label>
-                    <input
-                        type="number"
-                        id="presentationDeadline"
-                        value={presentationDeadline}
-                        onChange={handleInputChange(setPresentationDeadline)}
                         required
                         min="1"
                         className="w-full bg-slate-700 border border-slate-600 rounded-md shadow-sm px-3 py-2 text-white focus:outline-none focus:ring-sky-500 focus:border-sky-500"

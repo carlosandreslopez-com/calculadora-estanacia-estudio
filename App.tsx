@@ -9,10 +9,10 @@ function App() {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleCalculate = (arrivalDate: string, stayDuration: number, presentationDeadline: number): boolean => {
+  const handleCalculate = (arrivalDate: string, stayDuration: number): boolean => {
     try {
       setError(null);
-      const newResult = calculateStudyStayBreakdown(arrivalDate, stayDuration, presentationDeadline);
+      const newResult = calculateStudyStayBreakdown(arrivalDate, stayDuration);
       setResult(newResult);
       return true;
     } catch (e) {
