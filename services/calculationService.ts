@@ -21,36 +21,39 @@ const parseDateUTC = (dateString: string): Date => {
     return date;
 };
 
+const diffInDays = (date1: Date, date2: Date): number => {
+    const msPerDay = 1000 * 60 * 60 * 24;
+    // Calculate the difference in milliseconds and convert to days
+    return Math.round((date1.getTime() - date2.getTime()) / msPerDay);
+};
+
 export const calculateStudyStayBreakdown = (
     arrivalDateStr: string,
-    stayDuration: number
+    stayDuration: number,
+    presentationDeadline: number
 ): CalculationResult => {
-    const daysBeforeExpiryToPresent = 60; // RD 1155/2024, Art. 54.3: "antelación mínima de dos meses"
-    const daysAfterPresentationForCourseStart = 60; // RD 1155/2024, Art. 54: "antelación mínima de dos meses"
 
-    if (stayDuration <= 0) {
-        throw new Error('La duración de la estancia debe ser un número positivo.');
+    if (stayDuration <= 0 || presentationDeadline <= 0) {
+        throw new Error('La duración de la estancia y el plazo de presentación deben ser números positivos.');
     }
 
-    if (stayDuration <= daysBeforeExpiryToPresent) {
-        throw new Error(`La estancia de turista (${stayDuration} días) es demasiado corta. Debe ser mayor de ${daysBeforeExpiryToPresent} días para poder presentar la solicitud.`);
+    if (presentationDeadline > stayDuration) {
+        throw new Error('El plazo de presentación no puede ser mayor que la duración total de la estancia de turista.');
     }
     
     const arrivalDate = parseDateUTC(arrivalDateStr);
 
-    const presentationWindowDays = stayDuration - daysBeforeExpiryToPresent;
-    
     const exitDate = addDays(arrivalDate, stayDuration);
-    const maxPresentationDate = addDays(arrivalDate, presentationWindowDays - 1);
+    const maxPresentationDate = addDays(arrivalDate, presentationDeadline);
 
     const breakdown: BreakdownRow[] = [];
-    for (let i = 0; i < presentationWindowDays; i++) {
+    for (let i = 0; i < presentationDeadline; i++) {
         const presentationDate = addDays(arrivalDate, i);
         
         breakdown.push({
             presentationDate,
-            remainingPresentationDays: presentationWindowDays - i,
-            courseStartDateMin: addDays(presentationDate, daysAfterPresentationForCourseStart),
+            remainingPresentationDays: presentationDeadline - i,
+            courseStartDateMin: addDays(presentationDate, 60), // As per spreadsheet logic
             remainingTouristDays: stayDuration - i,
         });
     }
