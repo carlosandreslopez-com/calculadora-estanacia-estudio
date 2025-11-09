@@ -64,7 +64,11 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ data, onReset }) => 
       </div>
 
       <h3 className="text-lg font-semibold text-white mb-4">Desglose Diario de Presentación</h3>
-      <div className="-my-2 overflow-x-auto">
+
+      {/* --- Responsive Table/Card List --- */}
+
+      {/* Desktop Table View: Hidden on small screens, visible from 'sm' breakpoint up */}
+      <div className="hidden sm:block -my-2 overflow-x-auto">
         <div className="py-2 align-middle inline-block min-w-full">
           <div className="shadow overflow-hidden border-b border-slate-700 sm:rounded-lg">
             <table className="min-w-full divide-y divide-slate-700">
@@ -94,6 +98,40 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ data, onReset }) => 
           </div>
         </div>
       </div>
+
+      {/* Mobile Card View: Visible only on small screens, hidden from 'sm' up */}
+      <div className="block sm:hidden space-y-3">
+        {data.breakdown.map((row, index) => (
+          <div key={index} className="bg-slate-800/70 p-4 rounded-lg border border-slate-700 shadow-md">
+            {/* Top row: Presentation Date */}
+            <div className="flex justify-between items-baseline pb-3 mb-3 border-b border-slate-700/50">
+              <span className="text-sm font-medium text-slate-400">Fecha Presentación</span>
+              <span className="text-base font-semibold text-white">{formatDate(row.presentationDate)}</span>
+            </div>
+
+            {/* Middle: Remaining days stats */}
+            <div className="flex justify-around items-center mb-3">
+              <div className="text-center">
+                <p className="text-2xl font-bold text-sky-400">{row.remainingPresentationDays}</p>
+                <p className="text-xs text-slate-400 uppercase tracking-wider">Días P/ Presentar</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-slate-300">{row.remainingTouristDays}</p>
+                <p className="text-xs text-slate-400 uppercase tracking-wider">Días de Turista</p>
+              </div>
+            </div>
+            
+            {/* Bottom: Course Date Range */}
+            <div>
+              <div className="text-sm font-medium text-slate-400 mb-1 text-center">Rango Válido de Inicio del Curso</div>
+              <div className="text-sm text-center font-mono bg-slate-900/80 p-2 rounded-md text-emerald-300 tracking-tight">
+                {`${formatDate(row.courseStartDateMin)} → ${formatDate(data.exitDate)}`}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      
     </div>
   );
 };
