@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calculadora de Estancia de Estudiante</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 1. Se añade Babel Standalone para la transpilación de TSX/JSX en el navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
       /* For custom scrollbar styling */
       ::-webkit-scrollbar {
@@ -34,15 +36,7 @@
 </head>
   <body class="bg-slate-900">
     <div id="root"></div>
-    <script>
-      // Dynamically load the main script with a cache-busting timestamp.
-      // This ensures the browser always fetches the latest version of the app,
-      // preventing issues with stale, cached, and potentially broken code.
-      const script = document.createElement('script');
-      script.type = 'module';
-      // Use a relative path './' to ensure it works correctly on nested paths like GitHub Pages.
-      script.src = `./index.tsx?v=${Date.now()}`;
-      document.body.appendChild(script);
-    </script>
+    <!-- 2. Se cambia el tipo de script a 'text/babel' y se añaden los presets 'react' y 'typescript' para que Babel lo transpile correctamente -->
+    <script type="text/babel" data-presets="react,typescript" src="./index.tsx"></script>
   </body>
 </html>
