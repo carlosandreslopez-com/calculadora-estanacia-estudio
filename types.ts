@@ -11,18 +11,3 @@ export interface CalculationResult {
   maxPresentationDate: Date;
   breakdown: BreakdownRow[];
 }
-
-// FIX: Add missing CalculatedStayRecord interface
-export interface CalculatedStayRecord {
-  no: string;
-  id: string;
-  nombre: string;
-  ingreso: string;
-  salida: string;
-  totalDays: number;
-  totalHours: number;
-  totalMinutes: number;
-  stayDays: number;
-  stayHours: number;
-  stayMinutes: number;
-}
