@@ -40,7 +40,8 @@
       // preventing issues with stale, cached, and potentially broken code.
       const script = document.createElement('script');
       script.type = 'module';
-      script.src = `/index.tsx?v=${Date.now()}`;
+      // Use a relative path './' to ensure it works correctly on nested paths like GitHub Pages.
+      script.src = `./index.tsx?v=${Date.now()}`;
       document.body.appendChild(script);
     </script>
   </body>
