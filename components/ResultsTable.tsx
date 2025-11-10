@@ -8,12 +8,11 @@ interface ResultsTableProps {
 }
 
 const formatDate = (date: Date): string => {
-    return date.toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        timeZone: 'UTC', // Ensure consistent date interpretation
-    });
+    // Pad with leading zeros if needed
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+    const year = date.getUTCFullYear();
+    return `${day}/${month}/${year}`;
 };
 
 const TableHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -58,12 +57,18 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ data, onReset }) => 
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <SummaryCard label="Fecha de Salida de Turista Calculada" date={formatDate(data.exitDate)} />
         <SummaryCard label="Fecha Límite Máx. de Presentación" date={formatDate(data.maxPresentationDate)} />
       </div>
+       <p className="text-xs text-slate-500 mt-2 mb-8 italic text-center md:text-left">
+         *La fecha límite es la que ocurra primero: 30 días desde la llegada o 60 días antes de la salida.
+       </p>
 
-      <h3 className="text-lg font-semibold text-white mb-4">Desglose Diario de Presentación</h3>
+      <h3 className="text-lg font-semibold text-white mb-2">Desglose Diario de Presentación</h3>
+      <p className="text-xs text-slate-500 mb-4 italic">
+        *El "Rango de Fecha de Inicio del Curso" se basa en una estimación de 60 días desde la presentación, un plazo común pero no un requisito legal estricto. Revise siempre los requisitos específicos de su caso.
+      </p>
 
       {/* --- Responsive Table/Card List --- */}
 

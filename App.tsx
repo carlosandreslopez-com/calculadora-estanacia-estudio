@@ -3,16 +3,23 @@ import type { CalculationResult } from './types.ts';
 import { ResultsTable } from './components/ResultsTable.tsx';
 import { Header } from './components/Header.tsx';
 import { DataEntryForm } from './components/DataEntryForm.tsx';
+import { DisclaimerFooter } from './components/DisclaimerFooter.tsx';
 import { calculateStudyStayBreakdown } from './services/calculationService.ts';
+
+interface CalculationParams {
+  arrivalDate: string;
+  stayDuration?: string;
+  exitDate?: string;
+}
 
 function App() {
   const [result, setResult] = useState<CalculationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleCalculate = (arrivalDate: string, stayDuration: number, presentationDeadline: number): boolean => {
+  const handleCalculate = (params: CalculationParams): boolean => {
     try {
       setError(null);
-      const newResult = calculateStudyStayBreakdown(arrivalDate, stayDuration, presentationDeadline);
+      const newResult = calculateStudyStayBreakdown(params);
       setResult(newResult);
       return true;
     } catch (e) {
@@ -38,6 +45,7 @@ function App() {
             <ResultsTable data={result} onReset={handleReset} />
           </div>
         </main>
+        <DisclaimerFooter />
       </div>
     </div>
   );

@@ -1,8 +1,40 @@
-import React, { useState } from 'react';
-import { CalculatorIcon, ErrorIcon } from './IconComponents.tsx';
+import React, { useState, useEffect } from 'react';
+import { CalculatorIcon, ErrorIcon, CalendarIcon } from './IconComponents.tsx';
+import { DatePicker } from './DatePicker.tsx';
+
+// Helper to parse date string from 'DD/MM/YYYY' format into a UTC Date object
+const parseSpanishDateUTC = (dateString: string): Date | null => {
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+        return null;
+    }
+    const parts = dateString.split('/').map(part => parseInt(part, 10));
+    const [day, month, year] = parts;
+    
+    const date = new Date(Date.UTC(year, month - 1, day));
+    
+    if (isNaN(date.getTime()) || date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
+        return null;
+    }
+    return date;
+};
+
+// Helper to format a Date object to a "dd/mm/yyyy" string
+const formatDateToSpanish = (date: Date): string => {
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const year = date.getUTCFullYear();
+    return `${day}/${month}/${year}`;
+};
+
+
+// Helper to calculate difference in days between two UTC dates
+const diffInDays = (date1: Date, date2: Date): number => {
+    const msPerDay = 1000 * 60 * 60 * 24;
+    return Math.round((date1.getTime() - date2.getTime()) / msPerDay);
+};
 
 interface DataEntryFormProps {
-    onCalculate: (arrivalDate: string, stayDuration: number, presentationDeadline: number) => boolean;
+    onCalculate: (params: { arrivalDate: string; stayDuration?: string; exitDate?: string; }) => boolean;
     error: string | null;
     clearError: () => void;
 }
@@ -10,67 +42,176 @@ interface DataEntryFormProps {
 export const DataEntryForm: React.FC<DataEntryFormProps> = ({ onCalculate, error, clearError }) => {
     const [arrivalDate, setArrivalDate] = useState('');
     const [stayDuration, setStayDuration] = useState('90');
-    const [presentationDeadline, setPresentationDeadline] = useState('30');
+    const [exitDate, setExitDate] = useState('');
+    const [mode, setMode] = useState<'duration' | 'date'>('duration');
+    const [calculatedDuration, setCalculatedDuration] = useState<number | null>(null);
+    
+    const [isArrivalPickerOpen, setArrivalPickerOpen] = useState(false);
+    const [isExitPickerOpen, setExitPickerOpen] = useState(false);
+
+    useEffect(() => {
+        if (mode === 'date' && arrivalDate && exitDate) {
+            const parsedArrival = parseSpanishDateUTC(arrivalDate);
+            const parsedExit = parseSpanishDateUTC(exitDate);
+
+            if (parsedArrival && parsedExit && parsedExit.getTime() >= parsedArrival.getTime()) {
+                const duration = diffInDays(parsedExit, parsedArrival) + 1;
+                setCalculatedDuration(duration);
+            } else {
+                setCalculatedDuration(null);
+            }
+        } else {
+            setCalculatedDuration(null);
+        }
+    }, [arrivalDate, exitDate, mode]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const durationAsNumber = parseInt(stayDuration, 10);
-        const deadlineAsNumber = parseInt(presentationDeadline, 10);
-
-        onCalculate(
-            arrivalDate,
-            isNaN(durationAsNumber) ? 90 : durationAsNumber,
-            isNaN(deadlineAsNumber) ? 30 : deadlineAsNumber
-        );
+        setArrivalPickerOpen(false);
+        setExitPickerOpen(false);
+        if (mode === 'duration') {
+            onCalculate({ arrivalDate, stayDuration });
+        } else {
+            onCalculate({ arrivalDate, exitDate });
+        }
     };
     
-    const handleInputChange = (setter: React.Dispatch<React.SetStateAction<string>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleTextChange = (setter: React.Dispatch<React.SetStateAction<string>>) => (e: React.ChangeEvent<HTMLInputElement>) => {
         setter(e.target.value);
         if (error) {
             clearError();
         }
     }
+    
+    const handleModeChange = (newMode: 'duration' | 'date') => {
+        setMode(newMode);
+        if (error) {
+            clearError();
+        }
+    }
+    
+    const handleSelectArrivalDate = (date: Date) => {
+        setArrivalDate(formatDateToSpanish(date));
+        setArrivalPickerOpen(false);
+        if (error) clearError();
+    };
+    
+    const handleSelectExitDate = (date: Date) => {
+        setExitDate(formatDateToSpanish(date));
+        setExitPickerOpen(false);
+        if (error) clearError();
+    };
 
     return (
         <div className="mb-6">
             <h2 className="text-xl font-semibold text-white mb-4">Ingresa los Detalles del Cálculo</h2>
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-4 items-end">
-                <div className="lg:col-span-2">
+            
+            <div className="mb-4">
+              <span className="block text-sm font-medium text-slate-300 mb-2">Define tu estancia de turista:</span>
+              <div className="flex p-1 rounded-lg bg-slate-700/50 w-full sm:w-auto max-w-sm">
+                <button
+                    type="button"
+                    onClick={() => handleModeChange('duration')}
+                    aria-pressed={mode === 'duration'}
+                    className={`w-1/2 py-2 px-4 rounded-md text-sm font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-500 ${mode === 'duration' ? 'bg-sky-600 text-white shadow' : 'text-slate-300 hover:bg-slate-600/50'}`}
+                >
+                    Con Duración (días)
+                </button>
+                <button
+                    type="button"
+                    onClick={() => handleModeChange('date')}
+                    aria-pressed={mode === 'date'}
+                    className={`w-1/2 py-2 px-4 rounded-md text-sm font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-500 ${mode === 'date' ? 'bg-sky-600 text-white shadow' : 'text-slate-300 hover:bg-slate-600/50'}`}
+                >
+                    Con Fecha de Salida
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-start">
+                <div className="lg:col-span-2 relative">
                     <label htmlFor="arrivalDate" className="block text-sm font-medium text-slate-300 mb-1">Fecha de Llegada</label>
-                    <input
-                        type="date"
-                        id="arrivalDate"
-                        value={arrivalDate}
-                        onChange={handleInputChange(setArrivalDate)}
-                        required
-                        className="w-full bg-slate-700 border border-slate-600 rounded-md shadow-sm px-3 py-2 text-white focus:outline-none focus:ring-sky-500 focus:border-sky-500"
-                    />
+                    <div className="relative">
+                        <input
+                            type="text"
+                            id="arrivalDate"
+                            value={arrivalDate}
+                            onChange={handleTextChange(setArrivalDate)}
+                            required
+                            placeholder="dd/mm/aaaa"
+                            autoComplete="off"
+                            className="w-full bg-slate-700 border border-slate-600 rounded-md shadow-sm px-3 pr-10 py-2 text-white focus:outline-none focus:ring-sky-500 focus:border-sky-500"
+                        />
+                         <button
+                            type="button"
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                            onClick={() => setArrivalPickerOpen(!isArrivalPickerOpen)}
+                            aria-label="Abrir selector de fecha de llegada"
+                        >
+                            <CalendarIcon className="h-5 w-5 text-slate-400" />
+                        </button>
+                    </div>
+                    {isArrivalPickerOpen && (
+                        <DatePicker
+                            currentDate={parseSpanishDateUTC(arrivalDate)}
+                            onSelectDate={handleSelectArrivalDate}
+                            onClose={() => setArrivalPickerOpen(false)}
+                        />
+                    )}
                 </div>
-                <div className="lg:col-span-2">
-                    <label htmlFor="stayDuration" className="block text-sm font-medium text-slate-300 mb-1">Duración Estancia de Turista (días)</label>
-                    <input
-                        type="number"
-                        id="stayDuration"
-                        value={stayDuration}
-                        onChange={handleInputChange(setStayDuration)}
-                        required
-                        min="1"
-                        className="w-full bg-slate-700 border border-slate-600 rounded-md shadow-sm px-3 py-2 text-white focus:outline-none focus:ring-sky-500 focus:border-sky-500"
-                    />
-                </div>
-                <div className="lg:col-span-2">
-                    <label htmlFor="presentationDeadline" className="block text-sm font-medium text-slate-300 mb-1">Plazo de Presentación (días)</label>
-                    <input
-                        type="number"
-                        id="presentationDeadline"
-                        value={presentationDeadline}
-                        onChange={handleInputChange(setPresentationDeadline)}
-                        required
-                        min="1"
-                        className="w-full bg-slate-700 border border-slate-600 rounded-md shadow-sm px-3 py-2 text-white focus:outline-none focus:ring-sky-500 focus:border-sky-500"
-                    />
-                </div>
-                <div className="lg:col-span-1">
+                
+                {mode === 'duration' ? (
+                    <div className="lg:col-span-2">
+                        <label htmlFor="stayDuration" className="block text-sm font-medium text-slate-300 mb-1">Duración Estancia (días)</label>
+                        <input
+                            type="number"
+                            id="stayDuration"
+                            value={stayDuration}
+                            onChange={handleTextChange(setStayDuration)}
+                            required
+                            min="1"
+                            className="w-full bg-slate-700 border border-slate-600 rounded-md shadow-sm px-3 py-2 text-white focus:outline-none focus:ring-sky-500 focus:border-sky-500"
+                        />
+                    </div>
+                ) : (
+                    <div className="lg:col-span-2 relative">
+                        <label htmlFor="exitDate" className="block text-sm font-medium text-slate-300 mb-1">Fecha de Salida de Turista</label>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                id="exitDate"
+                                value={exitDate}
+                                onChange={handleTextChange(setExitDate)}
+                                required
+                                placeholder="dd/mm/aaaa"
+                                autoComplete="off"
+                                className="w-full bg-slate-700 border border-slate-600 rounded-md shadow-sm px-3 pr-10 py-2 text-white focus:outline-none focus:ring-sky-500 focus:border-sky-500"
+                            />
+                            <button
+                                type="button"
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                onClick={() => setExitPickerOpen(!isExitPickerOpen)}
+                                aria-label="Abrir selector de fecha de salida"
+                            >
+                                <CalendarIcon className="h-5 w-5 text-slate-400" />
+                            </button>
+                        </div>
+                        {isExitPickerOpen && (
+                            <DatePicker
+                                currentDate={parseSpanishDateUTC(exitDate)}
+                                onSelectDate={handleSelectExitDate}
+                                onClose={() => setExitPickerOpen(false)}
+                            />
+                        )}
+                        {calculatedDuration && calculatedDuration > 0 && (
+                            <p className="text-sm text-slate-400 italic mt-2">
+                                Duración de la estancia calculada: <span className="font-semibold text-sky-400 not-italic">{calculatedDuration} días</span>.
+                            </p>
+                        )}
+                    </div>
+                )}
+
+                <div className="lg:col-span-1 self-end">
                     <button
                         type="submit"
                         className="w-full h-10 flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200"

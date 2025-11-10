@@ -7,19 +7,26 @@ const addDays = (date: Date, days: number): Date => {
     return result;
 };
 
-// Helper to parse date string from 'YYYY-MM-DD' format into a UTC Date object
-const parseDateUTC = (dateString: string): Date => {
+// Helper to parse date string from 'DD/MM/YYYY' format into a UTC Date object
+const parseSpanishDateUTC = (dateString: string): Date => {
     if (!dateString) {
-        throw new Error('La fecha de llegada es obligatoria.');
+        throw new Error('La fecha es obligatoria.');
     }
-    const parts = dateString.split('-').map(part => parseInt(part, 10));
-    // new Date(year, monthIndex, day)
-    const date = new Date(Date.UTC(parts[0], parts[1] - 1, parts[2]));
-    if (isNaN(date.getTime())) {
-        throw new Error(`Formato de fecha inválido: "${dateString}".`);
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
+        throw new Error(`Formato de fecha inválido: "${dateString}". Use dd/mm/aaaa.`);
+    }
+    
+    const parts = dateString.split('/').map(part => parseInt(part, 10));
+    const [day, month, year] = parts;
+
+    const date = new Date(Date.UTC(year, month - 1, day));
+
+    if (isNaN(date.getTime()) || date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
+        throw new Error(`Fecha inválida: "${dateString}". Verifique el día y el mes.`);
     }
     return date;
 };
+
 
 const diffInDays = (date1: Date, date2: Date): number => {
     const msPerDay = 1000 * 60 * 60 * 24;
@@ -27,41 +34,81 @@ const diffInDays = (date1: Date, date2: Date): number => {
     return Math.round((date1.getTime() - date2.getTime()) / msPerDay);
 };
 
+const MIN_ANTICIPATION_DAYS = 60;
+const PRESENTATION_WINDOW_DAYS = 30;
+
+interface CalculationParams {
+  arrivalDate: string;
+  stayDuration?: string;
+  exitDate?: string;
+}
+
 export const calculateStudyStayBreakdown = (
-    arrivalDateStr: string,
-    stayDuration: number,
-    presentationDeadline: number
+    params: CalculationParams
 ): CalculationResult => {
-
-    if (stayDuration <= 0 || presentationDeadline <= 0) {
-        throw new Error('La duración de la estancia y el plazo de presentación deben ser números positivos.');
-    }
-
-    if (presentationDeadline > stayDuration) {
-        throw new Error('El plazo de presentación no puede ser mayor que la duración total de la estancia de turista.');
-    }
+    const { arrivalDate: arrivalDateStr, stayDuration: stayDurationStr, exitDate: exitDateStr } = params;
     
-    const arrivalDate = parseDateUTC(arrivalDateStr);
+    if (!arrivalDateStr) {
+        throw new Error('La fecha de llegada es obligatoria.');
+    }
 
-    const exitDate = addDays(arrivalDate, stayDuration);
-    const maxPresentationDate = addDays(arrivalDate, presentationDeadline);
+    const arrivalDate = parseSpanishDateUTC(arrivalDateStr);
+    let exitDate: Date;
 
-    const breakdown: BreakdownRow[] = [];
-    for (let i = 0; i < presentationDeadline; i++) {
+    if (stayDurationStr !== undefined) {
+        const stayDuration = parseInt(stayDurationStr, 10);
+        if (isNaN(stayDuration) || stayDuration <= 0) {
+            throw new Error('La duración de la estancia debe ser un número positivo.');
+        }
+        exitDate = addDays(arrivalDate, stayDuration - 1);
+    } else if (exitDateStr) {
+        exitDate = parseSpanishDateUTC(exitDateStr);
+        if (exitDate.getTime() < arrivalDate.getTime()) {
+            throw new Error('La fecha de salida debe ser posterior a la fecha de llegada.');
+        }
+    } else {
+        throw new Error('Debe proporcionar la duración de la estancia o la fecha de salida.');
+    }
+
+    const validBreakdownRows: BreakdownRow[] = [];
+
+    // Iterate through the first 30 days (the maximum possible window)
+    for (let i = 0; i < PRESENTATION_WINDOW_DAYS; i++) {
         const presentationDate = addDays(arrivalDate, i);
         
-        breakdown.push({
-            presentationDate,
-            remainingPresentationDays: presentationDeadline - i,
-            courseStartDateMin: addDays(presentationDate, 60), // As per spreadsheet logic
-            remainingTouristDays: stayDuration - i,
-        });
+        // For each day, calculate the earliest possible course start date
+        const courseStartDateMin = addDays(presentationDate, MIN_ANTICIPATION_DAYS);
+
+        // A presentation date is only valid if the course can start before the tourist stay ends.
+        if (courseStartDateMin.getTime() <= exitDate.getTime()) {
+            validBreakdownRows.push({
+                presentationDate,
+                remainingPresentationDays: 0, // Placeholder, calculated later
+                courseStartDateMin,
+                remainingTouristDays: diffInDays(exitDate, presentationDate) + 1,
+            });
+        }
     }
+
+    // After checking all potential days, if none were valid, throw an error.
+    if (validBreakdownRows.length === 0) {
+        throw new Error(
+            'Imposible cumplir los plazos. El requisito de que el curso empiece 60 días después de la solicitud hace que la fecha de inicio sea posterior a la de salida del turista.'
+        );
+    }
+    
+    // Finalize the breakdown data with the correct remaining days count.
+    const finalBreakdown = validBreakdownRows.map((row, index, arr) => ({
+        ...row,
+        remainingPresentationDays: arr.length - index,
+    }));
+
+    const maxPresentationDate = finalBreakdown[finalBreakdown.length - 1].presentationDate;
 
     return {
         arrivalDate,
         exitDate,
         maxPresentationDate,
-        breakdown,
+        breakdown: finalBreakdown,
     };
 };

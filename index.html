@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -22,7 +22,7 @@
         background: #64748b; /* slate-500 */
       }
     </style>
-  <script type="importmap">
+<script type="importmap">
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.2.0",
@@ -36,11 +36,11 @@
   <body class="bg-slate-900">
     <div id="root"></div>
     <!--
-      Load the app through esm.sh, which fetches directly from GitHub,
-      transpiles TSX, and resolves modules on the fly.
-      This replaces the need for Babel Standalone and importmaps for a multi-file project.
+      The module script now directly points to the entry point of our application.
+      This allows the development environment to correctly load and execute the code
+      from the editor, with esm.sh handling the TSX transpilation and module resolution.
     -->
-    <script type="module" src="https://esm.sh/gh/carlosandreslopez-com/calculadora-estanacia-estudio@main/index.tsx"></script>
+    <script type="module" src="index.tsx"></script>
   <script type="module" src="/index.tsx"></script>
 </body>
 </html>

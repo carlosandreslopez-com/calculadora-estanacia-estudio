@@ -7,7 +7,7 @@ export const Header: React.FC = () => {
         Calculadora de Estancia de Estudiante
       </h1>
       <p className="mt-3 text-lg text-slate-400 max-w-3xl mx-auto">
-        Calcula las fechas límite clave para tu visa de estudiante según tu fecha de llegada. Encuentra tu fecha máxima de presentación y los rangos de fechas válidos para el inicio de tu curso.
+        Calcula tus plazos clave. La solicitud debe presentarse dentro de los primeros <strong>30 días</strong> de tu llegada. Además, el curso debe iniciar al menos <strong>60 días</strong> después de tu solicitud, pero siempre antes de que finalice tu estancia legal como turista.
       </p>
     </header>
   );
