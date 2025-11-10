@@ -23,10 +23,10 @@
       }
     </style>
     <!--
-      The importmap has been removed. esm.sh will handle all module resolution,
-      including React, which prevents version conflicts and simplifies setup.
+      The importmap has been removed because esm.sh handles all module resolution,
+      including React. This prevents version conflicts and simplifies the setup for production.
     -->
-<script type="importmap">
+  <script type="importmap">
 {
   "imports": {
     "react": "https://aistudiocdn.com/react@^19.2.0",
@@ -35,18 +35,23 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
   <body class="bg-slate-900">
     <div id="root"></div>
     <!--
-      This script tag now points to esm.sh. This service fetches your code
-      directly from your GitHub repository, transpiles the TSX into plain JavaScript
-      that browsers can understand, and bundles all the necessary dependencies like React.
-      This is the key change that makes the application work on a static host like GitHub Pages.
-      NOTE: For changes to appear on your website, you must push them to GitHub first.
+      CACHE BUSTING SCRIPT:
+      This script dynamically creates the module script tag. By appending the current
+      timestamp (`?t=<timestamp>`) to the URL, we trick the browser and esm.sh into
+      thinking it's a new file on every page load. This forces them to bypass their
+      caches and fetch the absolute latest version of the code from GitHub.
+      This solves the issue of seeing an outdated version of the application.
     -->
-    <script type="module" src="https://esm.sh/gh/carlosandreslopez-com/calculadora-estanacia-estudio/index.tsx"></script>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <script type="module">
+      const script = document.createElement('script');
+      script.type = 'module';
+      const timestamp = new Date().getTime();
+      script.src = `https://esm.sh/gh/carlosandreslopez-com/calculadora-estanacia-estudio/index.tsx?t=${timestamp}`;
+      document.body.appendChild(script);
+    </script>
+  </body>
 </html>
