@@ -1,7 +1,16 @@
 import React from 'react';
 import { InformationCircleIcon } from './IconComponents.tsx';
 
+// Let TypeScript know about our global variable from index.html
+declare global {
+  interface Window {
+    APP_VERSION?: string;
+  }
+}
+
 export const Disclaimer: React.FC = () => {
+  const versionTimestamp = window.APP_VERSION || 'desconocida';
+
   return (
     <footer className="mt-8 w-full">
       <div className="bg-slate-800/50 rounded-lg p-4 sm:p-6 border border-yellow-500/30 text-yellow-200/80">
@@ -19,6 +28,9 @@ export const Disclaimer: React.FC = () => {
             </p>
           </div>
         </div>
+      </div>
+      <div className="text-center mt-4 text-xs text-slate-600 font-mono">
+        <p>Versión de página cargada: {versionTimestamp}</p>
       </div>
     </footer>
   );
