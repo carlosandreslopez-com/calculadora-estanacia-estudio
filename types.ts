@@ -1,18 +1,3 @@
-// FIX: Add missing CalculatedStayRecord interface, which is used in services/csvProcessor.ts.
-export interface CalculatedStayRecord {
-  no: string;
-  id: string;
-  nombre: string;
-  ingreso: string;
-  salida: string;
-  totalDays: number;
-  totalHours: number;
-  totalMinutes: number;
-  stayDays: number;
-  stayHours: number;
-  stayMinutes: number;
-}
-
 export interface BreakdownRow {
   presentationDate: Date;
   remainingPresentationDays: number;
@@ -25,4 +10,19 @@ export interface CalculationResult {
   exitDate: Date;
   maxPresentationDate: Date;
   breakdown: BreakdownRow[];
+}
+
+// FIX: Added missing CalculatedStayRecord type which was causing an import error in `services/csvProcessor.ts`.
+export interface CalculatedStayRecord {
+  no: string;
+  id: string;
+  nombre: string;
+  ingreso: string;
+  salida: string;
+  totalDays: number;
+  totalHours: number;
+  totalMinutes: number;
+  stayDays: number;
+  stayHours: number;
+  stayMinutes: number;
 }

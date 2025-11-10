@@ -3,7 +3,7 @@ import type { CalculationResult } from './types.ts';
 import { ResultsTable } from './components/ResultsTable.tsx';
 import { Header } from './components/Header.tsx';
 import { DataEntryForm } from './components/DataEntryForm.tsx';
-import { DisclaimerFooter } from './components/DisclaimerFooter.tsx';
+import { Disclaimer } from './components/Disclaimer.tsx';
 import { calculateStudyStayBreakdown } from './services/calculationService.ts';
 
 interface CalculationParams {
@@ -45,7 +45,7 @@ function App() {
             <ResultsTable data={result} onReset={handleReset} />
           </div>
         </main>
-        <DisclaimerFooter />
+        <Disclaimer />
       </div>
     </div>
   );
