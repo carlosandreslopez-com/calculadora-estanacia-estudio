@@ -104,7 +104,7 @@ export const DataEntryForm: React.FC<DataEntryFormProps> = ({ onCalculate, error
 
     return (
         <div className="mb-6">
-            <h2 className="text-xl font-semibold text-white mb-4">Ingresa los Detalles del Cálculo</h2>
+            <h2 className="text-xl font-semibold text-white mb-4">Ingresa los Detalles del Cálculo 1</h2>
             
             <div className="mb-4">
               <span className="block text-sm font-medium text-slate-300 mb-2">Define tu estancia de turista:</span>
