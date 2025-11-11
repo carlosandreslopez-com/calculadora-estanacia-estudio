@@ -23,10 +23,10 @@ const TableCell: React.FC<{ children: React.ReactNode, className?: string }> = (
     <td className={`px-4 py-4 whitespace-nowrap text-sm text-slate-300 ${className}`}>{children}</td>
 );
 
-const SummaryCard: React.FC<{ label: string, date: string }> = ({ label, date }) => (
-    <div className="bg-slate-800 p-4 rounded-lg flex-1">
-        <p className="text-sm font-medium text-slate-400">{label}</p>
-        <p className="text-xl font-bold text-sky-400">{date}</p>
+const SummaryCard: React.FC<{ label: string; date: string; highlight?: boolean }> = ({ label, date, highlight }) => (
+    <div className={`p-4 rounded-lg flex-1 transition-all duration-300 h-full ${highlight ? 'bg-cyan-500 border-2 border-cyan-200 shadow-xl shadow-cyan-400/40' : 'bg-slate-800'}`}>
+        <p className={`text-sm font-medium ${highlight ? 'text-cyan-900' : 'text-slate-400'}`}>{label}</p>
+        <p className={`text-2xl font-bold ${highlight ? 'text-white' : 'text-sky-400'}`}>{date}</p>
     </div>
 );
 
@@ -58,8 +58,13 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ data, onReset }) => 
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <SummaryCard label="Fecha de Salida de Turista Calculada" date={formatDate(data.exitDate)} />
-        <SummaryCard label="Fecha Límite Máx. de Presentación" date={formatDate(data.maxPresentationDate)} />
+        {/* Swapped source order and used `order-first` to force a visual update and trick caching */}
+        <div className="order-first">
+            <SummaryCard label="Fecha Límite Máx. de Presentación" date={formatDate(data.maxPresentationDate)} highlight />
+        </div>
+        <div>
+            <SummaryCard label="Fecha de Salida de Turista Calculada" date={formatDate(data.exitDate)} />
+        </div>
       </div>
        <p className="text-xs text-slate-500 mt-2 mb-8 italic text-center md:text-left">
          *La fecha límite es la que ocurra primero: 30 días desde la llegada o 60 días antes de la salida.
