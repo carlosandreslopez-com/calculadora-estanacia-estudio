@@ -86,7 +86,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({ currentDate, onS
     return (
         <div 
             ref={datePickerRef}
-            className="absolute top-full right-0 mt-2 w-72 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl p-4 z-50 animate-fade-in-up"
+            className="absolute top-full left-0 mt-2 w-72 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl p-4 z-50 animate-fade-in-up"
         >
             <div className="flex justify-between items-center mb-4">
                 <button type="button" onClick={() => changeMonth(-1)} className="p-2 rounded-full hover:bg-slate-700 transition-colors" aria-label="Mes anterior">

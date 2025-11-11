@@ -109,7 +109,30 @@ export const DataEntryForm: React.FC<DataEntryFormProps> = ({ onCalculate, error
             
             <form onSubmit={handleSubmit}>
                 <FormLayout>
-                    {/* --- Field 1: Arrival Date --- */}
+                    {/* --- Field 1: Stay Definition Mode (Spans both columns) --- */}
+                    <div className="md:col-span-2">
+                      <span className="block text-sm font-medium text-slate-300 mb-2">Define tu estancia de turista:</span>
+                      <div className="flex p-1 rounded-lg bg-slate-700/50 w-full sm:w-auto max-w-sm">
+                        <button
+                            type="button"
+                            onClick={() => handleModeChange('duration')}
+                            aria-pressed={mode === 'duration'}
+                            className={`w-1/2 py-2 px-4 rounded-md text-sm font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-500 ${mode === 'duration' ? 'bg-sky-600 text-white shadow' : 'text-slate-300 hover:bg-slate-600/50'}`}
+                        >
+                            Con Duración (días)
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => handleModeChange('date')}
+                            aria-pressed={mode === 'date'}
+                            className={`w-1/2 py-2 px-4 rounded-md text-sm font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-500 ${mode === 'date' ? 'bg-sky-600 text-white shadow' : 'text-slate-300 hover:bg-slate-600/50'}`}
+                        >
+                            Con Fecha de Salida
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* --- Field 2: Arrival Date --- */}
                     <div>
                         <label htmlFor="arrivalDate" className="block text-sm font-medium text-slate-300 mb-1">Fecha de Llegada</label>
                         <div className="relative">
@@ -139,29 +162,6 @@ export const DataEntryForm: React.FC<DataEntryFormProps> = ({ onCalculate, error
                                 />
                             )}
                         </div>
-                    </div>
-
-                    {/* --- Field 2: Stay Definition Mode --- */}
-                    <div>
-                      <span className="block text-sm font-medium text-slate-300 mb-2">Define tu estancia de turista:</span>
-                      <div className="flex p-1 rounded-lg bg-slate-700/50 w-full sm:w-auto max-w-sm">
-                        <button
-                            type="button"
-                            onClick={() => handleModeChange('duration')}
-                            aria-pressed={mode === 'duration'}
-                            className={`w-1/2 py-2 px-4 rounded-md text-sm font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-500 ${mode === 'duration' ? 'bg-sky-600 text-white shadow' : 'text-slate-300 hover:bg-slate-600/50'}`}
-                        >
-                            Con Duración (días)
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => handleModeChange('date')}
-                            aria-pressed={mode === 'date'}
-                            className={`w-1/2 py-2 px-4 rounded-md text-sm font-semibold transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-sky-500 ${mode === 'date' ? 'bg-sky-600 text-white shadow' : 'text-slate-300 hover:bg-slate-600/50'}`}
-                        >
-                            Con Fecha de Salida
-                        </button>
-                      </div>
                     </div>
                     
                     {/* --- Field 3: Conditional Input for Stay --- */}
