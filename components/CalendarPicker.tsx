@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-interface DatePickerProps {
+interface CalendarPickerProps {
     currentDate: Date | null;
     onSelectDate: (date: Date) => void;
     onClose: () => void;
@@ -9,7 +9,7 @@ interface DatePickerProps {
 const MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 const DAY_NAMES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-export const DatePicker: React.FC<DatePickerProps> = ({ currentDate, onSelectDate, onClose }) => {
+export const CalendarPicker: React.FC<CalendarPickerProps> = ({ currentDate, onSelectDate, onClose }) => {
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
@@ -86,7 +86,7 @@ export const DatePicker: React.FC<DatePickerProps> = ({ currentDate, onSelectDat
     return (
         <div 
             ref={datePickerRef}
-            className="absolute top-full left-0 mt-2 w-72 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl p-4 z-50 animate-fade-in-up"
+            className="absolute top-full right-0 mt-2 w-72 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl p-4 z-50 animate-fade-in-up"
         >
             <div className="flex justify-between items-center mb-4">
                 <button type="button" onClick={() => changeMonth(-1)} className="p-2 rounded-full hover:bg-slate-700 transition-colors" aria-label="Mes anterior">

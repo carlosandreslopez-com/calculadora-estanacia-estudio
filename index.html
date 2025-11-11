@@ -47,8 +47,9 @@
     <script type="module">
       const script = document.createElement('script');
       script.type = 'module';
-      // Use a timestamp to prevent caching issues and ensure the latest version is loaded from GitHub.
-      script.src = `https://esm.sh/gh/carlosandreslopez-com/calculadora-estanacia-estudio@main/index.tsx?t=${new Date().getTime()}`;
+      // Use `?bundle` to combine all JS into one file and a timestamp to bust the cache.
+      // This ensures the latest version of the entire app is always loaded.
+      script.src = `https://esm.sh/gh/carlosandreslopez-com/calculadora-estanacia-estudio@main/index.tsx?bundle&t=${new Date().getTime()}`;
       document.body.appendChild(script);
     </script>
   <script type="module" src="/index.tsx"></script>
