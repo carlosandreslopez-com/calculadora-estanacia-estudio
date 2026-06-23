@@ -37,7 +37,7 @@ All date math is done in **UTC** to avoid timezone drift (`Date.UTC`, `getUTCDat
 
 ## Styling
 
-Tailwind is loaded from the **CDN** (`<script src="https://cdn.tailwindcss.com">` in `index.html`) — there is no local Tailwind config, PostCSS, or build step for it. Style exclusively with utility classes inline; the design is a dark slate/sky theme.
+Tailwind is loaded from the **Play CDN**, pinned to a version with Subresource Integrity (`<script src="https://cdn.tailwindcss.com/3.4.17" integrity="sha384-..." crossorigin="anonymous">` in `index.html`) — there is no local Tailwind config, PostCSS, or build step for it. Style exclusively with utility classes inline; the design is a dark slate/sky theme. If you bump the pinned Tailwind version, recompute the `integrity` hash (`sha384` base64 of the fetched bytes) or the browser will block the script.
 
 ## Module resolution gotchas
 
@@ -46,4 +46,4 @@ Tailwind is loaded from the **CDN** (`<script src="https://cdn.tailwindcss.com">
 
 ## Deployment note
 
-`index.html` contains an unusual dual-loading setup: alongside the normal Vite `/index.tsx` entry, it also injects a cache-busted script from `https://esm.sh/gh/carlosandreslopez-com/calculadora-estanacia-estudio@main/index.tsx`, meaning the deployed page can pull the app straight from the GitHub `main` branch via esm.sh. A `window.APP_VERSION` load timestamp is set for version verification. Be aware of this when reasoning about how changes reach production.
+The app entry is the standard Vite `/index.tsx` module in `index.html`. A `window.APP_VERSION` load timestamp is set for version verification. (A previous setup also injected a cache-busted `https://esm.sh/gh/.../@main/index.tsx` script that pulled the app straight from GitHub `main`; it was removed because it duplicated the Vite entry and double-mounted React.)

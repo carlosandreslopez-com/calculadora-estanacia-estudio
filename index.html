@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Stay Duration Calculator</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17" integrity="sha384-igm5BeiBt36UU4gqwWS7imYmelpTsZlQ45FZf+XBn9MuJbn4nQr7yx1yFydocC/K" crossorigin="anonymous"></script>
     <style>
       /* For custom scrollbar styling */
       ::-webkit-scrollbar {
@@ -44,14 +44,6 @@
       });
     </script>
     <div id="root"></div>
-    <script type="module">
-      const script = document.createElement('script');
-      script.type = 'module';
-      // Use `?bundle` to combine all JS into one file and a timestamp to bust the cache.
-      // This ensures the latest version of the entire app is always loaded.
-      script.src = `https://esm.sh/gh/carlosandreslopez-com/calculadora-estanacia-estudio@main/index.tsx?bundle&t=${new Date().getTime()}`;
-      document.body.appendChild(script);
-    </script>
   <script type="module" src="/index.tsx"></script>
 </body>
 </html>
