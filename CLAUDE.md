@@ -23,7 +23,7 @@ Everything that matters lives in `src/services/calculationService.ts` — `calcu
 - `PRESENTATION_WINDOW_DAYS = 30` — the application must be filed within the first 30 days after arrival.
 - `MIN_ANTICIPATION_DAYS = 60` — the course must start at least 60 days after the application is filed, and still before the tourist stay ends.
 
-The function walks each of the first 30 days, keeps only the presentation dates whose earliest possible course start (presentation + 60 days) falls on or before the exit date, and returns a per-day breakdown plus the latest valid presentation date (`maxPresentationDate`). If no day qualifies it throws a Spanish-language error. When changing these rules, update the constants here and the explanatory copy in `src/components/Header.tsx` and `src/components/ResultsTable.tsx`, which restate the 30/60-day rules to the user.
+The function walks each of the first 30 days, keeps only the presentation dates whose earliest possible course start (presentation + 60 days) falls on or before the exit date, and returns a per-day breakdown plus the latest valid presentation date (`maxPresentationDate`). If no day qualifies it throws a Spanish-language error. When changing these rules, update the constants here and the explanatory copy in `src/components/Header.astro` and `src/components/ResultsTable.tsx`, which restate the 30/60-day rules to the user.
 
 ### Date handling (important)
 
@@ -31,14 +31,14 @@ All date math is done in **UTC** to avoid timezone drift (`Date.UTC`, `getUTCDat
 
 ## Architecture
 
-This is an Astro site whose single page hosts the React app as one client-side island.
+This is an Astro site whose single page is mostly static HTML, with the interactive calculator as one client-side React island.
 
-- `src/pages/index.astro` renders `<App client:only="react" />` inside `src/layouts/Layout.astro`. **`client:only` (not `client:load`) is required** — the app touches browser APIs (`document`) during render, so it must not be server-rendered. (This matches the app's original CSR-only behavior.)
-- `src/layouts/Layout.astro` owns the `<html>`/`<head>`/`<body>` shell, imports `src/styles/global.css`, and sets the `window.APP_VERSION` load-timestamp (shown in the footer by `Disclaimer`).
-- `src/App.tsx` holds the only app state (`result`, `error`) and passes `handleCalculate`/`handleReset` down. Data flow is one-way: `DataEntryForm` (toggles between "duration" and "exit date" modes) → `App.handleCalculate` → `calculationService` → `ResultsTable` renders the `CalculationResult`. Shared types are in `src/types.ts`.
-- React components live in `src/components/`: `Header`, `DataEntryForm`, `ResultsTable`, `Disclaimer`, plus the leaf components `CalendarPicker`, `FormLayout`, `IconComponents`.
+- `src/pages/index.astro` owns the page shell (the slate background wrapper, `<main>`, and the static `Header`/`Disclaimer`) and renders the lone island `<Calculator client:only="react" />` inside `src/layouts/Layout.astro`. **`client:only` (not `client:load`) is required** — the calculator touches browser APIs during render, so it must not be server-rendered. (This matches the app's original CSR-only behavior.)
+- `src/layouts/Layout.astro` owns the `<html>`/`<head>`/`<body>` shell, imports `src/styles/global.css`, and sets the `window.APP_VERSION` load-timestamp (read and shown in the footer by `Disclaimer.astro`'s inline script).
+- `src/components/Calculator.tsx` is the only React island: it holds the app state (`result`, `error`) and wraps both interactive children, which share that state. Data flow is one-way: `DataEntryForm` (toggles between "duration" and "exit date" modes) → `Calculator.handleCalculate` → `calculationService` → `ResultsTable` renders the `CalculationResult`. Shared types are in `src/types.ts`.
+- Static shell is native Astro: `src/components/Header.astro` and `src/components/Disclaimer.astro` (ship zero JS). Remaining React components in `src/components/`: `DataEntryForm`, `ResultsTable`, plus the leaf components `CalendarPicker`, `FormLayout`, `IconComponents`.
 
-> **Stage 2 (planned):** the static shell (`Header`, `Disclaimer`, layout) is intended to be converted to native `.astro`, keeping only the interactive form/results as React islands. Not done yet — the whole UI is currently one React island.
+> **Stage 2 — done.** The static shell (`Header`, `Disclaimer`, page layout) is now native `.astro`; only the form/results calculator remains a React island. (If reintroducing a static React component, mind that `client:only` islands can't share state with `.astro` siblings — keep co-stateful pieces inside `Calculator.tsx`.)
 
 ## Styling
 
@@ -46,7 +46,7 @@ Tailwind **v4** is compiled at build time via the `@tailwindcss/vite` plugin (co
 
 ## Module resolution
 
-- Imports use **explicit `.ts`/`.tsx` extensions** (e.g. `import { Header } from './components/Header.tsx'`). Match this convention.
+- Imports use **explicit `.ts`/`.tsx` extensions** (e.g. `import { DataEntryForm } from './DataEntryForm.tsx'`). Match this convention. (`.astro` components are imported without an extension override, per Astro convention.)
 - No path aliases or `process.env` usage in app code. (The old AI-Studio Vite setup wired an unused `GEMINI_API_KEY`; that's gone.)
 
 ## Deployment

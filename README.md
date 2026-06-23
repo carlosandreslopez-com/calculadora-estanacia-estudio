@@ -24,10 +24,13 @@ npm run dev      # servidor de desarrollo en http://localhost:4321
 
 ## Estructura
 
-- `src/pages/index.astro` — página única; monta la app React como isla cliente.
+- `src/pages/index.astro` — página única; shell estático que monta la calculadora
+  interactiva como única isla React (`client:only`).
 - `src/layouts/Layout.astro` — shell HTML, estilos globales.
-- `src/App.tsx`, `src/components/`, `src/services/calculationService.ts` — la app React
-  y la lógica de cálculo.
+- `src/components/Header.astro`, `src/components/Disclaimer.astro` — cabecera y pie
+  estáticos (sin JS).
+- `src/components/Calculator.tsx`, el resto de `src/components/` y
+  `src/services/calculationService.ts` — la isla React y la lógica de cálculo.
 
 ## Despliegue
 

@@ -15,18 +15,38 @@ Format for each entry:
 
 > Keep this list current — move things here to "Done" in a dated entry when finished.
 
-- [ ] **Push the Claude GitHub Actions workflows to `main`** when the new app version is
-      working. Files exist locally only, uncommitted: `.github/workflows/claude.yml`
-      and `.github/workflows/claude-code-review.yml`. Nothing has been pushed yet.
-- [ ] **Delete the installer's redundant remote branch**
-      `add-claude-github-actions-1782223169088` once our tuned versions are on `main`
-      (it contains the installer's untuned copies of the same two files — would conflict).
-- [ ] **Push the 2 unpushed local commits** on `main` (local is ahead of `origin/main`
-      by 2 commits) — decide together before pushing.
-- [ ] **MIGRATE THE PROJECT TO ASTRO** — currently a Vite + React 19 SPA (single-page
-      "estancia de estudiante" deadline calculator, Spanish UI). Plan & scope TBD with
-      the user. Preserve the domain logic in `services/calculationService.ts` (UTC date
-      math, 30/60-day rules) exactly.
+- [ ] **Decide on `origin/bump-node-24`** — open remote branch bumping Node to 24
+      while Vercel/CI currently pin Node 22. Merge or delete.
+- [x] ~~Astro migration~~ — done (PR #1, merged).
+- [x] ~~Push Claude GitHub Actions workflows~~ — both committed/tracked on `main`.
+- [x] ~~Delete installer's redundant remote branch~~ — gone.
+- [x] ~~Push unpushed local commits~~ — `main` is in sync with `origin/main`.
+- [x] ~~Stage 2: convert static shell to native `.astro`~~ — done (see entry below).
+
+---
+
+## 2026-06-23 — Stage 2: static shell → native Astro
+
+**Done:**
+- Converted the static chrome to native `.astro` (ships zero JS): `Header.tsx` →
+  `Header.astro`, `Disclaimer.tsx` → `Disclaimer.astro` (its info-circle SVG inlined;
+  the `window.APP_VERSION` footer value is filled by a small `is:inline` script).
+- Extracted the interactive part of `App.tsx` into `src/components/Calculator.tsx` —
+  the lone React island (`client:only`), holding the shared `result`/`error` state and
+  wrapping `DataEntryForm` + `ResultsTable`. Deleted `App.tsx`.
+- Moved the page-shell wrapper divs into `src/pages/index.astro`, which now renders
+  `Header`/`Disclaimer` statically around `<Calculator client:only="react" />`.
+- Removed the now-unused `InformationCircleIcon` export from `IconComponents.tsx`.
+- Updated CLAUDE.md and README to describe the new structure.
+
+**Why:** the planned Stage 2 architecture — keep only the interactive form/results as a
+React island, render everything else as static HTML so less JS is shipped.
+
+**Verified:** `pnpm run build` passes; built `dist/index.html` contains the Header and
+Disclaimer as static HTML and exactly one `<astro-island>` (the Calculator).
+(`astro check` not run — needs the uninstalled `@astrojs/check` dep; not added.)
+
+**Pending:** none for Stage 2.
 
 ---
 

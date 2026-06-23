@@ -1,8 +1,18 @@
 ---
 import Layout from '../layouts/Layout.astro';
-import App from '../App.tsx';
+import Header from '../components/Header.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import { Calculator } from '../components/Calculator.tsx';
 ---
 
 <Layout>
-  <App client:only="react" />
+  <div class="bg-slate-900 text-slate-200 min-h-screen font-sans flex flex-col items-center p-4 sm:p-6 lg:p-8">
+    <div class="w-full max-w-7xl mx-auto">
+      <Header />
+      <main class="mt-8 bg-slate-800/50 rounded-xl p-4 sm:p-8 border border-slate-700 shadow-2xl shadow-slate-950/50">
+        <Calculator client:only="react" />
+      </main>
+      <Disclaimer />
+    </div>
+  </div>
 </Layout>
