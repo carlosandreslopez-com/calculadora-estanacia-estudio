@@ -1,20 +1,36 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Calculadora de Estancia de Estudiante
 
-# Run and deploy your AI Studio app
+Calculadora (interfaz en español) para los plazos de la solicitud de estancia por
+estudios en España. A partir de la fecha de llegada y la duración o la fecha de salida
+del periodo de turista, calcula la ventana válida para presentar la solicitud.
 
-This contains everything you need to run your app locally.
+Construida con **Astro 7** + una isla de **React 19**, estilada con **Tailwind CSS v4**
+y desplegada en **Vercel**.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1u-e_BYI4OVHmMbtEf-4j2Jr7w3WNjNbY
+## Desarrollo local
 
-## Run Locally
+**Requisito:** Node.js
 
-**Prerequisites:**  Node.js
+```bash
+npm install
+npm run dev      # servidor de desarrollo en http://localhost:4321
+```
 
+| Comando            | Acción                                         |
+| ------------------ | ---------------------------------------------- |
+| `npm run dev`      | Servidor de desarrollo (`localhost:4321`)      |
+| `npm run build`    | Compila el sitio estático en `dist/`           |
+| `npm run preview`  | Sirve la compilación de `dist/` localmente     |
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Estructura
+
+- `src/pages/index.astro` — página única; monta la app React como isla cliente.
+- `src/layouts/Layout.astro` — shell HTML, estilos globales.
+- `src/App.tsx`, `src/components/`, `src/services/calculationService.ts` — la app React
+  y la lógica de cálculo.
+
+## Despliegue
+
+El proyecto se despliega en Vercel (preset de Astro autodetectado). Cada push a `main`
+genera un despliegue de producción; las ramas/PRs generan previews. Para volver a una
+versión anterior que funcionaba, usa **Instant Rollback** en el panel de Vercel.
