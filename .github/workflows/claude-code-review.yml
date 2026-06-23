@@ -1,0 +1,83 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+    # Only review when source that can affect behavior changes.
+    paths:
+      - "**/*.ts"
+      - "**/*.tsx"
+      - "index.html"
+      - "vite.config.ts"
+      - "package.json"
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        id: claude-review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            REPO: ${{ github.repository }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
+
+            You are reviewing a pull request for a single-page Spanish-language
+            calculator for Spain's student-residency ("estancia de estudiante")
+            application deadlines. Read CLAUDE.md first — it is the source of truth
+            for this project's conventions. Use `gh pr diff` / `gh pr view` to read
+            the change, then leave a concise review.
+
+            Focus your review on the things that actually break THIS app. Flag, in
+            priority order:
+
+            1. DATE / TIMEZONE BUGS — all date math MUST stay in UTC
+               (Date.UTC, getUTCDate, etc.). Any use of local-time Date methods
+               (getDate, getMonth, new Date(y, m, d), getTimezoneOffset reliance)
+               is a bug. Dates are parsed from and formatted to dd/mm/yyyy.
+
+            2. BUSINESS-RULE DRIFT — the two rules live in
+               services/calculationService.ts as PRESENTATION_WINDOW_DAYS = 30
+               (file within the first 30 days after arrival) and
+               MIN_ANTICIPATION_DAYS = 60 (course starts >= 60 days after filing,
+               still before the tourist stay ends). If these constants or the
+               loop logic change, verify the explanatory Spanish copy in
+               components/Header.tsx and components/ResultsTable.tsx was updated
+               to match. Inconsistency between rule and copy is a defect.
+
+            3. DUPLICATED HELPERS OUT OF SYNC — the parse/format/diff date helpers
+               are intentionally duplicated between services/calculationService.ts
+               and components/DataEntryForm.tsx. If one copy changes, the other
+               must change identically. Flag any divergence.
+
+            4. SPANISH UI CONSISTENCY — all user-facing copy, errors, and date
+               formats must remain in Spanish (dd/mm/aaaa). Flag English strings
+               or other date formats leaking into the UI.
+
+            5. TAILWIND CDN INTEGRITY — Tailwind is loaded from the Play CDN in
+               index.html pinned with a Subresource Integrity (SRI) hash. If the
+               pinned version changes, the integrity hash must be recomputed or the
+               browser blocks the script. Flag a version bump without a matching
+               hash update.
+
+            6. MODULE-RESOLUTION CONVENTION — imports use explicit .ts/.tsx
+               extensions (e.g. './components/Header.tsx'). Flag extensionless
+               imports of local modules.
+
+            Also call out genuine correctness bugs, security issues, and obvious
+            logic errors. Do NOT nitpick style, formatting, or naming — there is no
+            linter/formatter and that is intentional. Keep the review short and
+            actionable; if the change looks correct, say so plainly.

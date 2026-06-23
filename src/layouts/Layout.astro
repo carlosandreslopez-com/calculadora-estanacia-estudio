@@ -1,0 +1,24 @@
+---
+import "../styles/global.css";
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculadora de Estancia de Estudiante</title>
+  </head>
+  <body class="bg-slate-900">
+    <script is:inline>
+      // Set a global variable with the page load timestamp.
+      // The app can display this for version verification.
+      window.APP_VERSION = new Date().toLocaleString('es-ES', {
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        hour12: false
+      });
+    </script>
+    <slot />
+  </body>
+</html>
