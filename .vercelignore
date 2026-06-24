@@ -1,4 +1,8 @@
+# Docs / AI config — not needed for the production build
 .claude
 CLAUDE.md
 WORKLOG.md
 README.md
+
+# CI workflows — not needed for the build
+.github

@@ -12,6 +12,14 @@ dist
 dist-ssr
 *.local
 
+# Environment variables (never commit secrets; keep an .env.example if needed)
+.env
+.env.*
+!.env.example
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
 # Astro / Vercel
 .astro/
 .vercel/
