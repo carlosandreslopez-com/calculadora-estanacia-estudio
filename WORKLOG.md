@@ -44,7 +44,17 @@ React island, render everything else as static HTML so less JS is shipped.
 
 **Verified:** `pnpm run build` passes; built `dist/index.html` contains the Header and
 Disclaimer as static HTML and exactly one `<astro-island>` (the Calculator).
-(`astro check` not run — needs the uninstalled `@astrojs/check` dep; not added.)
+`pnpm check` (`astro check`) is clean: **0 errors / 0 warnings / 0 hints**.
+
+**Also (type-check setup & fixes):**
+- Installed `@astrojs/check` + `typescript` as **devDependencies**; added a `check`
+  script (`astro check`). `astro check` had put `@astrojs/check` in `dependencies` —
+  moved it to dev so it doesn't ship as a runtime dep.
+- Fixed the issues `astro check` surfaced: unused `React` import in `Calculator.tsx`
+  (React 19 + `jsx: react-jsx` needs no React import); `aria-pressed` was `boolean|null`
+  in `CalendarPicker.tsx` (`currentDate && …` → `currentDate != null && …`); deprecated
+  `React.FormEvent` in `DataEntryForm.tsx` → `React.SyntheticEvent<HTMLFormElement>`
+  (only `preventDefault` is used). Last two were pre-existing, not from Stage 2.
 
 **Pending:** none for Stage 2.
 

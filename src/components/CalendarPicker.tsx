@@ -51,7 +51,7 @@ export const CalendarPicker: React.FC<CalendarPickerProps> = ({ currentDate, onS
         for (let day = 1; day <= daysInMonth; day++) {
             const date = new Date(Date.UTC(year, month, day));
             
-            const isSelected = currentDate && date.getTime() === currentDate.getTime();
+            const isSelected = currentDate != null && date.getTime() === currentDate.getTime();
             const isToday = date.getTime() === today.getTime();
 
             let classes = 'w-full aspect-square flex items-center justify-center rounded-full text-sm cursor-pointer transition-colors duration-200 ';

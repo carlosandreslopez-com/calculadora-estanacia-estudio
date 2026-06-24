@@ -4,13 +4,22 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-- `npm install` — install dependencies
-- `npm run dev` — start the Astro dev server (default `http://localhost:4321`)
-- `npm run build` — production build via Astro (static output to `dist/`)
-- `npm run preview` — serve the built `dist/` locally
-- `npm run astro -- add <integration>` / `npm run astro -- check` — Astro CLI passthrough
+This project uses **pnpm** (see `packageManager` in `package.json`). Use `pnpm`, not `npm`.
 
-This is an **Astro 7** project with a **React 19** island (`@astrojs/react`). There is **no test runner, linter, or formatter** configured. `astro build` does not type-check; run `npm run astro -- check` for that.
+- `pnpm install` — install dependencies
+- `pnpm dev` — start the Astro dev server (default `http://localhost:4321`)
+- `pnpm build` — production build via Astro (static output to `dist/`)
+- `pnpm preview` — serve the built `dist/` locally
+- `pnpm check` — type-check `.astro`/`.ts`/`.tsx` via `astro check` (`@astrojs/check` + `typescript` are installed as devDependencies)
+- `pnpm astro add <integration>` — Astro CLI passthrough
+
+This is an **Astro 7** project with a **React 19** island (`@astrojs/react`). There is **no test runner, linter, or formatter** configured. `astro build` does not type-check — run `pnpm check` for that; it should report **0 errors, 0 warnings, 0 hints** (CI/pre-commit gate).
+
+### Conventions for contributors (humans & agents)
+
+- **Use `pnpm`, never `npm`/`yarn`.** The repo pins `packageManager` and the Vercel build expects a pnpm lockfile.
+- **Follow Astro best practices** — keep the static-by-default islands model (ship JS only via explicit `client:*` directives; static UI stays native `.astro`). When unsure about Astro APIs, directives, or idioms, **consult the official Astro docs via the `astro-docs` MCP** (`search_astro_docs`) rather than guessing. The MCP is also wired into the `@claude` GitHub workflow.
+- **Keep `pnpm check` clean (0/0/0)** before committing.
 
 ## What this app does
 

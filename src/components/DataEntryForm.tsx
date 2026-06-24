@@ -66,7 +66,7 @@ export const DataEntryForm: React.FC<DataEntryFormProps> = ({ onCalculate, error
         }
     }, [arrivalDate, exitDate, mode]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = (e: React.SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault();
         setArrivalPickerOpen(false);
         setExitPickerOpen(false);

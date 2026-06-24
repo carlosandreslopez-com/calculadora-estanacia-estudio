@@ -9,18 +9,19 @@ y desplegada en **Vercel**.
 
 ## Desarrollo local
 
-**Requisito:** Node.js
+**Requisito:** Node.js 22 y [pnpm](https://pnpm.io/) (este proyecto usa pnpm, no npm)
 
 ```bash
-npm install
-npm run dev      # servidor de desarrollo en http://localhost:4321
+pnpm install
+pnpm dev      # servidor de desarrollo en http://localhost:4321
 ```
 
-| Comando            | Acción                                         |
-| ------------------ | ---------------------------------------------- |
-| `npm run dev`      | Servidor de desarrollo (`localhost:4321`)      |
-| `npm run build`    | Compila el sitio estático en `dist/`           |
-| `npm run preview`  | Sirve la compilación de `dist/` localmente     |
+| Comando         | Acción                                          |
+| --------------- | ----------------------------------------------- |
+| `pnpm dev`      | Servidor de desarrollo (`localhost:4321`)       |
+| `pnpm build`    | Compila el sitio estático en `dist/`            |
+| `pnpm preview`  | Sirve la compilación de `dist/` localmente      |
+| `pnpm check`    | Verifica tipos con `astro check`                |
 
 ## Estructura
 

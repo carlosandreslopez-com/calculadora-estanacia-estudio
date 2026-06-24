@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import type { CalculationResult } from '../types.ts';
 import { ResultsTable } from './ResultsTable.tsx';
 import { DataEntryForm } from './DataEntryForm.tsx';
