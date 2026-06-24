@@ -21,14 +21,21 @@ Format for each entry:
   and Stage 2 (static shell → `.astro`) both shipped to production via Vercel (push to
   `main` auto-deploys). `pnpm check` is clean (0/0/0); `pnpm build` passes.
 - **Package manager: `pnpm` only** — never `npm`/`yarn` (lockfile + Vercel depend on it).
-- **Next action when you return:** confirm the latest Vercel production deploy went green
-  (push of `df07341`), then decide on the one open item below.
+- **Next action when you return:** confirm the latest Vercel production deploy went green,
+  then handle the open items below.
+- **In flight: UX/UI redesign.** The user is working with **Claude Design** (separate, no
+  repo access) on a new look. Handoff spec lives in **`DESIGN-BRIEF.md`** (repo root) — it's
+  self-contained for the designer. When the proposal returns, **we adapt it into Astro here**
+  (see DESIGN-BRIEF.md §7 "Internal implementation notes" for where each piece lands).
 
 ### Open / pending items
 
+- [ ] **Adapt the Claude Design UX/UI proposal into the app** when it arrives. Source of
+      truth for constraints + file mapping: `DESIGN-BRIEF.md`. Presentation only — never
+      touch `calculationService.ts` or the Spanish copy/rules. Tailwind **v4** (`@theme`,
+      no config). Verify `pnpm check` 0/0/0 + `pnpm build`.
 - [ ] **Decide on `origin/bump-node-24`** — open remote branch bumping Node to 24 while
       `package.json` `engines` + Vercel pin Node **22**. Merge (and re-pin to 24) or delete.
-      This is the *only* outstanding item.
 
 ### Recently completed (newest first)
 
