@@ -11,17 +11,88 @@ Format for each entry:
 
 ---
 
-## Open / pending items (rolling summary)
+## ▶ Resume here (state as of 2026-06-24)
 
-> Keep this list current — move things here to "Done" in a dated entry when finished.
+> Read this first after a restart. Quick "where we are / where we left off".
 
-- [ ] **Decide on `origin/bump-node-24`** — open remote branch bumping Node to 24
-      while Vercel/CI currently pin Node 22. Merge or delete.
-- [x] ~~Astro migration~~ — done (PR #1, merged).
-- [x] ~~Push Claude GitHub Actions workflows~~ — both committed/tracked on `main`.
-- [x] ~~Delete installer's redundant remote branch~~ — gone.
-- [x] ~~Push unpushed local commits~~ — `main` is in sync with `origin/main`.
-- [x] ~~Stage 2: convert static shell to native `.astro`~~ — done (see entry below).
+- **Branch/sync:** on `main`, HEAD = `df07341`, **fully pushed** (`origin/main` is in sync,
+  0 ahead / 0 behind). Working tree clean.
+- **App status:** Astro 7 + React 19 island app. **Done and deployed.** Stage 1 (migration)
+  and Stage 2 (static shell → `.astro`) both shipped to production via Vercel (push to
+  `main` auto-deploys). `pnpm check` is clean (0/0/0); `pnpm build` passes.
+- **Package manager: `pnpm` only** — never `npm`/`yarn` (lockfile + Vercel depend on it).
+- **Next action when you return:** confirm the latest Vercel production deploy went green
+  (push of `df07341`), then decide on the one open item below.
+
+### Open / pending items
+
+- [ ] **Decide on `origin/bump-node-24`** — open remote branch bumping Node to 24 while
+      `package.json` `engines` + Vercel pin Node **22**. Merge (and re-pin to 24) or delete.
+      This is the *only* outstanding item.
+
+### Recently completed (newest first)
+
+- [x] Stage 2: static shell → native `.astro`; clean `astro check`; loading fallback;
+      pnpm standardized in docs. Pushed (`df07341`). — 2026-06-24
+- [x] Astro migration (PR #1, merged); workflows pushed; installer branch deleted; `main`
+      in sync. — 2026-06-23
+
+---
+
+## 📚 Knowledge base (gotchas — don't repeat these)
+
+> Hard-won facts. Verify before changing; these caused real friction.
+
+- **Use `pnpm`, not `npm`.** Docs/commands must say `pnpm …`. Mixing in `npm run …` (even
+  just in docs) is a mistake we made and corrected. Vercel build expects the pnpm lockfile.
+- **`@astrojs/check` belongs in `devDependencies`.** Running `pnpm astro check` the first
+  time auto-installs it into `dependencies` — move it to `devDependencies` (it's build-only,
+  shouldn't ship at runtime). `pnpm check` script = `astro check`.
+- **`astro build` does NOT type-check.** Run `pnpm check` for that. Keep it at 0/0/0 before
+  committing — it's the closest thing to a CI gate (no linter/formatter/tests configured).
+- **`client:only="react"` is required** for the calculator island (NOT `client:load`): it
+  touches browser APIs during render and must not be server-rendered. The framework hint
+  (`"react"`) is mandatory for `client:only`.
+- **`client:only` islands can't share state with `.astro` siblings.** Co-stateful pieces
+  (the form + results, which share `result`/`error`) must live together inside one island
+  (`Calculator.tsx`). Don't split them into separate `.astro`-mounted islands.
+- **React 19 + `jsx: react-jsx` needs no `import React`.** An unused `React` import trips
+  `astro check`. Import only what you use (`import { useState } from 'react'`).
+- **`React.FormEvent` is deprecated in @types/react 19.** Use `React.SyntheticEvent<…>` (or
+  a more specific event). `boolean | null` from `a && b` (e.g. `currentDate && …`) breaks
+  ARIA boolean props — coerce with `x != null && …`.
+- **When unsure about Astro, use the `astro-docs` MCP** (`search_astro_docs`) — don't guess.
+  It's also wired into the `@claude` GitHub workflow.
+- **Domain logic is sacred:** all date math stays UTC; the 30/60-day rules live in
+  `src/services/calculationService.ts` and are restated in `Header.astro` / `ResultsTable.tsx`
+  — keep constants and copy in sync (see CLAUDE.md).
+
+---
+
+## 2026-06-24 — Finalize Stage 2: type-check clean, loading state, pnpm, ship
+
+**Done:**
+- Ran `pnpm astro check` for the first time (it installed `@astrojs/check` + `typescript`).
+  Drove all diagnostics to **0 errors / 0 warnings / 0 hints** — fixes detailed in the
+  knowledge base above (unused `React` import, `aria-pressed` boolean coercion, deprecated
+  `React.FormEvent`). Moved `@astrojs/check` to `devDependencies`; added a `pnpm check` script.
+- Added a **polished loading state**: `slot="fallback"` on the `client:only` Calculator
+  island in `index.astro` — a themed sky spinner + "Cargando calculadora…", shown during
+  hydration. Confirmed it renders in the built `dist/index.html`.
+- **Standardized on pnpm** across docs (CLAUDE.md + README) after catching `npm run …`
+  references; added a "Conventions for contributors (humans & agents)" block to CLAUDE.md
+  documenting pnpm, the `astro-docs` MCP, Astro best practices, and the 0/0/0 check gate.
+- **Committed `df07341` and pushed to `main`** (`6f8dbb8..df07341`, 3 commits total incl.
+  the earlier Stage 2 + `.vercelignore` commits) → triggers Vercel production deploy.
+
+**Why:** the preview confirmed the app worked, so we hardened it (type safety, perceived
+performance) and made the conventions explicit so neither humans nor agents repeat the
+npm/pnpm and type-check mistakes. Then shipped.
+
+**Verified:** `pnpm check` 0/0/0; `pnpm build` passes; fallback present in built HTML;
+`git status` clean; `origin/main` in sync at `df07341`.
+
+**Pending:** only `origin/bump-node-24` (see Resume block). Verify the prod deploy is green.
 
 ---
 
