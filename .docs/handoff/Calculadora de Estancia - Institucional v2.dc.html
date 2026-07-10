@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; }
+  body{ margin:0; }
+  input[type=date]::-webkit-calendar-picker-indicator{ opacity:.5; cursor:pointer; }
+  input:focus{ outline:none; }
+  @keyframes toastIn{ from{ opacity:0; transform:translate(-50%,12px);} to{ opacity:1; transform:translate(-50%,0);} }
+  @keyframes fadeUp{ from{ opacity:0; transform:translateY(8px);} to{ opacity:1; transform:translateY(0);} }
+  @keyframes spin{ to{ transform:rotate(360deg);} }
+  @media print{ .no-print{ display:none !important; } }
+</style>
+</helmet>
+
+<div style="min-height:100vh; background:#f4f3ee; font-family:'Public Sans',-apple-system,sans-serif; color:#1b1f27; padding:{{ pagePad }}; -webkit-font-smoothing:antialiased;">
+  <div style="max-width:880px; margin:0 auto;">
+
+    <!-- UTILITY BAR -->
+    <div class="no-print" style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:24px;">
+      <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 13px; border:1px solid #d8d4c8; border-radius:999px; background:#fbfaf6; font-size:11.5px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:#5f6776;">
+        <span style="width:7px; height:7px; border-radius:50%; background:#2f7d52; display:inline-block;"></span>
+        {{ L.badge }}
+      </div>
+      <div style="display:inline-flex; padding:3px; gap:3px; background:#ffffff; border:1px solid #e6e2d8; border-radius:9px;">
+        <button onClick="{{ setEs }}" style="{{ esBtnStyle }}">ES</button>
+        <button onClick="{{ setEn }}" style="{{ enBtnStyle }}">EN</button>
+        <button onClick="{{ setPt }}" style="{{ ptBtnStyle }}">PT-BR</button>
+      </div>
+    </div>
+
+    <!-- HEADER -->
+    <header style="margin-bottom:24px;">
+      <h1 style="font-family:'Newsreader',serif; font-weight:500; font-size:{{ h1Size }}; line-height:1.05; letter-spacing:-.015em; margin:0 0 14px; color:#171a21;">{{ L.title }}</h1>
+      <p style="font-size:16.5px; line-height:1.6; color:#525a68; max-width:640px; margin:0;">{{ L.subtitle }}</p>
+    </header>
+
+    <!-- INPUT CARD -->
+    <section style="background:#ffffff; border:1px solid #e6e2d8; border-radius:16px; padding:{{ cardPad }}; box-shadow:0 1px 2px rgba(23,26,33,.04), 0 8px 24px -16px rgba(23,26,33,.12); margin-bottom:22px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px;">
+        <h2 style="font-size:13px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:#7a8290; margin:0;">{{ L.detailsTitle }}</h2>
+        <span class="no-print" style="font-size:12.5px; color:#9aa0ac;">{{ L.autoUpdate }}</span>
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="display:block; font-size:13.5px; font-weight:600; color:#454d5b; margin-bottom:9px;">{{ L.defineStay }}</label>
+        <div style="display:inline-flex; padding:4px; gap:4px; background:#f1efe8; border:1px solid #e6e2d8; border-radius:11px; flex-wrap:wrap;">
+          <button onClick="{{ setDuration }}" style="{{ durBtnStyle }}">{{ L.byDuration }}</button>
+          <button onClick="{{ setDepartureMode }}" style="{{ depBtnStyle }}">{{ L.byDeparture }}</button>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:{{ inputCols }}; gap:18px;">
+        <div>
+          <label style="display:block; font-size:13.5px; font-weight:600; color:#454d5b; margin-bottom:8px;">{{ L.arrivalLabel }}</label>
+          <input type="date" value="{{ arrival }}" onChange="{{ onArrival }}" style="width:100%; height:48px; padding:0 14px; font-family:'Public Sans',sans-serif; font-size:15px; color:#1b1f27; background:#fbfaf6; border:1px solid #ddd8cc; border-radius:10px;" style-focus="border-color:#26385f; background:#ffffff; box-shadow:0 0 0 3px rgba(40,64,110,.14);">
+        </div>
+        <sc-if value="{{ showDuration }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <label style="display:block; font-size:13.5px; font-weight:600; color:#454d5b; margin-bottom:8px;">{{ L.durationLabel }}</label>
+            <input type="number" min="1" value="{{ duration }}" onChange="{{ onDuration }}" style="width:100%; height:48px; padding:0 14px; font-family:'Public Sans',sans-serif; font-size:15px; color:#1b1f27; background:#fbfaf6; border:1px solid #ddd8cc; border-radius:10px;" style-focus="border-color:#26385f; background:#ffffff; box-shadow:0 0 0 3px rgba(40,64,110,.14);">
+          </div>
+        </sc-if>
+        <sc-if value="{{ showDeparture }}" hint-placeholder-val="{{ true }}">
+          <div>
+            <label style="display:block; font-size:13.5px; font-weight:600; color:#454d5b; margin-bottom:8px;">{{ L.departureLabel }}</label>
+            <input type="date" value="{{ departure }}" onChange="{{ onDeparture }}" style="width:100%; height:48px; padding:0 14px; font-family:'Public Sans',sans-serif; font-size:15px; color:#1b1f27; background:#fbfaf6; border:1px solid #ddd8cc; border-radius:10px;" style-focus="border-color:#26385f; background:#ffffff; box-shadow:0 0 0 3px rgba(40,64,110,.14);">
+            <sc-if value="{{ showDurHelper }}" hint-placeholder-val="{{ false }}">
+              <div style="font-size:12.5px; color:#828a98; margin-top:7px;">{{ durHelperText }}</div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </div>
+    </section>
+
+    <!-- STATUS BANNER -->
+    <div style="{{ bannerStyle }}">
+      <div style="display:flex; align-items:flex-start; gap:13px;">
+        <span style="{{ bannerIconStyle }}">{{ bannerIcon }}</span>
+        <div>
+          <div style="font-weight:700; font-size:15.5px; margin-bottom:3px; color:{{ bannerTitleColor }};">{{ bannerTitle }}</div>
+          <div style="font-size:14px; line-height:1.55; color:#5a6072;">{{ bannerText }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WAITING / EMPTY STATE -->
+    <sc-if value="{{ showWaiting }}" hint-placeholder-val="{{ false }}">
+      <section style="background:#ffffff; border:1px dashed #d8d4c8; border-radius:16px; padding:48px 28px; text-align:center; margin-bottom:22px;">
+        <div style="width:56px; height:56px; margin:0 auto 18px; border-radius:14px; background:#f1efe8; display:flex; align-items:center; justify-content:center; font-size:26px;">🗓️</div>
+        <div style="font-family:'Newsreader',serif; font-weight:500; font-size:23px; color:#2b3340; margin-bottom:8px;">{{ L.waitingTitle }}</div>
+        <div style="font-size:14.5px; line-height:1.55; color:#828a98; max-width:380px; margin:0 auto;">{{ L.waitingText }}</div>
+      </section>
+    </sc-if>
+
+    <!-- RESULTS (only when feasible) -->
+    <sc-if value="{{ showResults }}" hint-placeholder-val="{{ true }}">
+      <div style="animation:fadeUp .35s ease;">
+
+        <!-- RESULTS GRID -->
+        <section style="display:grid; grid-template-columns:{{ resultsCols }}; gap:18px; margin-bottom:22px;">
+          <div style="background:linear-gradient(155deg,#2b4068,#1f2e4d); border-radius:16px; padding:26px 26px 24px; color:#fff; box-shadow:0 16px 32px -20px rgba(20,28,48,.7); position:relative; overflow:hidden;">
+            <div style="font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#9db0d6; margin-bottom:16px;">{{ L.heroLabel }}</div>
+            <div style="font-family:'Newsreader',serif; font-weight:500; font-size:{{ heroSize }}; line-height:1.02; letter-spacing:-.01em; margin-bottom:6px;">{{ limiteLong }}</div>
+            <div style="font-size:14px; color:#aab8d6; margin-bottom:18px;">{{ limiteShort }}</div>
+            <div style="display:inline-flex; align-items:center; gap:8px; padding:7px 13px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); border-radius:9px; font-size:13.5px; color:#fff;">{{ daysAvailStr }}</div>
+            <div style="font-size:12.5px; line-height:1.5; color:#8fa0c6; margin-top:16px;">{{ governedNote }}</div>
+          </div>
+          <div style="display:grid; grid-template-rows:1fr 1fr; gap:18px;">
+            <div style="background:#ffffff; border:1px solid #e6e2d8; border-radius:16px; padding:20px 22px; display:flex; flex-direction:column; justify-content:center;">
+              <div style="font-size:12px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:#8a92a0; margin-bottom:9px;">{{ L.salidaLabel }}</div>
+              <div style="font-family:'Newsreader',serif; font-weight:500; font-size:26px; line-height:1; color:#1b2433;">{{ salidaShort }}</div>
+              <div style="font-size:13px; color:#828a98; margin-top:6px;">{{ totalDaysStr }}</div>
+            </div>
+            <div style="background:#ffffff; border:1px solid #e6e2d8; border-radius:16px; padding:20px 22px; display:flex; flex-direction:column; justify-content:center;">
+              <div style="font-size:12px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:#8a92a0; margin-bottom:9px;">{{ L.cursoLabel }}</div>
+              <div style="font-family:'Newsreader',serif; font-weight:500; font-size:18px; line-height:1.25; color:#1b2433;">{{ cursoWindow }}</div>
+              <div style="font-size:13px; color:#828a98; margin-top:6px;">{{ L.cursoHint }}</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TIMELINE -->
+        <section style="background:#ffffff; border:1px solid #e6e2d8; border-radius:16px; padding:28px 28px 12px; margin-bottom:22px;">
+          <h2 style="font-size:13px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:#7a8290; margin:0 0 24px;">{{ L.timelineTitle }}</h2>
+          <sc-for list="{{ milestones }}" as="m" hint-placeholder-count="4">
+            <div style="display:grid; grid-template-columns:30px 1fr; gap:18px;">
+              <div style="display:flex; flex-direction:column; align-items:center;">
+                <span style="{{ m.dotStyle }}">{{ m.n }}</span>
+                <span style="{{ m.lineStyle }}"></span>
+              </div>
+              <div style="padding-bottom:26px;">
+                <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:5px; line-height:1.3;">
+                  <span style="font-family:'Newsreader',serif; font-size:20px; font-weight:500; color:{{ m.dateColor }};">{{ m.date }}</span>
+                  <span style="font-size:14.5px; font-weight:600; color:#2b3340;">{{ m.label }}</span>
+                </div>
+                <div style="font-size:13.5px; line-height:1.55; color:#7b8290;">{{ m.desc }}</div>
+              </div>
+            </div>
+          </sc-for>
+        </section>
+
+        <!-- LEAD CTA -->
+        <section class="no-print" style="background:#eef1f7; border:1px solid #d7deec; border-radius:16px; padding:26px; margin-bottom:22px;">
+          <div style="display:flex; align-items:flex-start; gap:13px; margin-bottom:18px;">
+            <span style="flex-shrink:0; width:38px; height:38px; border-radius:11px; background:#26385f; color:#fff; display:flex; align-items:center; justify-content:center; font-size:18px;">✦</span>
+            <div>
+              <h3 style="font-size:18px; font-weight:700; color:#222a36; margin:0 0 4px;">{{ L.ctaTitle }}</h3>
+              <p style="font-size:14px; line-height:1.5; color:#5f6776; margin:0;">{{ L.ctaSub }}</p>
+            </div>
+          </div>
+          <sc-if value="{{ emailSent }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; align-items:center; gap:10px; padding:14px 16px; background:#eef6f0; border:1px solid #cfe4d6; border-radius:11px; font-size:14.5px; font-weight:600; color:#2c6b48;">
+              <span style="width:22px; height:22px; border-radius:50%; background:#d6ecdd; color:#2f7d52; display:inline-flex; align-items:center; justify-content:center; font-size:12px;">✓</span>
+              {{ L.sentMsg }}
+            </div>
+          </sc-if>
+          <sc-if value="{{ emailNotSent }}" hint-placeholder-val="{{ true }}">
+            <div>
+              <form onSubmit="{{ onEmailSubmit }}" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:12px;">
+                <input type="email" required value="{{ email }}" onChange="{{ onEmail }}" placeholder="{{ L.emailPh }}" style="flex:1; min-width:200px; height:48px; padding:0 16px; font-family:'Public Sans',sans-serif; font-size:15px; color:#1b1f27; background:#ffffff; border:1px solid #ddd8cc; border-radius:11px;" style-focus="border-color:#26385f; box-shadow:0 0 0 3px rgba(40,64,110,.14);">
+                <button type="submit" style="height:48px; padding:0 22px; font-family:'Public Sans',sans-serif; font-size:15px; font-weight:600; color:#fff; background:#26385f; border:none; border-radius:11px; cursor:pointer; white-space:nowrap;">{{ L.sendBtn }}</button>
+              </form>
+              <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button onClick="{{ onPdf }}" style="display:inline-flex; align-items:center; gap:8px; height:44px; padding:0 16px; font-family:'Public Sans',sans-serif; font-size:14px; font-weight:600; color:#28406e; background:#ffffff; border:1px solid #d7deec; border-radius:10px; cursor:pointer;"><span>⬇</span>{{ L.pdfBtn }}</button>
+                <button onClick="{{ onShare }}" style="display:inline-flex; align-items:center; gap:8px; height:44px; padding:0 16px; font-family:'Public Sans',sans-serif; font-size:14px; font-weight:600; color:#28406e; background:#ffffff; border:1px solid #d7deec; border-radius:10px; cursor:pointer;"><span>↗</span>{{ L.shareBtn }}</button>
+              </div>
+            </div>
+          </sc-if>
+        </section>
+
+        <!-- DETAILED BREAKDOWN -->
+        <section style="background:#ffffff; border:1px solid #e6e2d8; border-radius:16px; overflow:hidden; margin-bottom:22px;">
+          <button onClick="{{ toggleTable }}" class="no-print" style="width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:20px 24px; background:transparent; border:none; cursor:pointer; text-align:left; font-family:'Public Sans',sans-serif;">
+            <div>
+              <div style="font-size:15px; font-weight:700; color:#2b3340;">{{ L.tableTitle }}</div>
+              <div style="font-size:13px; color:#8a92a0; margin-top:2px;">{{ tableSubStr }}</div>
+            </div>
+            <span style="{{ chevronStyle }}">{{ chevron }}</span>
+          </button>
+          <sc-if value="{{ showTable }}" hint-placeholder-val="{{ false }}">
+            <div style="border-top:1px solid #eceae2;">
+              <div style="padding:8px 24px 0; font-size:12.5px; color:#9aa0ac; line-height:1.5;">{{ L.tableNote }}</div>
+
+              <!-- DESKTOP TABLE -->
+              <sc-if value="{{ showDesktopTable }}" hint-placeholder-val="{{ true }}">
+                <div style="overflow-x:auto;">
+                  <table style="width:100%; border-collapse:collapse; min-width:560px;">
+                    <thead>
+                      <tr>
+                        <th style="text-align:left; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#9aa0ac; padding:16px 24px 10px;">{{ L.thDate }}</th>
+                        <th style="text-align:left; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#9aa0ac; padding:16px 12px 10px;">{{ L.thRest }}</th>
+                        <th style="text-align:left; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#9aa0ac; padding:16px 12px 10px;">{{ L.thWindow }}</th>
+                        <th style="text-align:left; font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#9aa0ac; padding:16px 24px 10px;">{{ L.thTur }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+                        <tr style="{{ r.rowStyle }}">
+                          <td style="padding:13px 24px; font-size:14px; font-weight:600; color:#2b3340; white-space:nowrap;">{{ r.fecha }}</td>
+                          <td style="padding:13px 12px;"><span style="{{ r.pillStyle }}">{{ r.restPres }}</span></td>
+                          <td style="padding:13px 12px; font-size:13.5px; color:#5f6776; white-space:nowrap;">{{ r.cursoRange }}</td>
+                          <td style="padding:13px 24px; font-size:14px; color:#5f6776;">{{ r.restTur }}</td>
+                        </tr>
+                      </sc-for>
+                    </tbody>
+                  </table>
+                </div>
+              </sc-if>
+
+              <!-- MOBILE STACKED CARDS -->
+              <sc-if value="{{ showMobileCards }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:16px; display:flex; flex-direction:column; gap:12px;">
+                  <sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
+                    <div style="border:1px solid #ece9e0; border-radius:13px; padding:16px; background:#fbfaf6;">
+                      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px;">
+                        <span style="font-size:15px; font-weight:700; color:#2b3340;">{{ r.fecha }}</span>
+                        <span style="{{ r.pillStyle }}">{{ r.restPres }} {{ L.daysShort }}</span>
+                      </div>
+                      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+                        <div style="background:#ffffff; border:1px solid #ece9e0; border-radius:10px; padding:11px 13px;">
+                          <div style="font-size:22px; font-weight:700; color:#26385f; line-height:1;">{{ r.restPres }}</div>
+                          <div style="font-size:11.5px; color:#8a92a0; margin-top:5px; line-height:1.3;">{{ L.statPres }}</div>
+                        </div>
+                        <div style="background:#ffffff; border:1px solid #ece9e0; border-radius:10px; padding:11px 13px;">
+                          <div style="font-size:22px; font-weight:700; color:#2b3340; line-height:1;">{{ r.restTur }}</div>
+                          <div style="font-size:11.5px; color:#8a92a0; margin-top:5px; line-height:1.3;">{{ L.statTur }}</div>
+                        </div>
+                      </div>
+                      <div style="background:#eef6f0; border:1px solid #cfe4d6; border-radius:10px; padding:10px 13px;">
+                        <div style="font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#5b9374; margin-bottom:3px;">{{ L.thWindow }}</div>
+                        <div style="font-size:13.5px; font-weight:600; color:#2c6b48;">{{ r.cursoRange }}</div>
+                      </div>
+                    </div>
+                  </sc-for>
+                </div>
+              </sc-if>
+            </div>
+          </sc-if>
+        </section>
+
+      </div>
+    </sc-if>
+
+    <!-- ADVISOR CTA -->
+    <section class="no-print" style="display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap; background:#222a36; border-radius:16px; padding:22px 26px; margin-bottom:22px;">
+      <div style="font-size:15.5px; line-height:1.5; color:#d3d8e0; max-width:520px;">{{ L.advisorText }}</div>
+      <button onClick="{{ onAdvisor }}" style="height:46px; padding:0 22px; font-family:'Public Sans',sans-serif; font-size:14.5px; font-weight:600; color:#222a36; background:#ffffff; border:none; border-radius:10px; cursor:pointer; white-space:nowrap;">{{ L.advisorBtn }} →</button>
+    </section>
+
+    <!-- DISCLAIMER -->
+    <footer style="display:flex; gap:13px; padding:20px 22px; background:#faf8f1; border:1px solid #ece7da; border-radius:14px; margin-bottom:18px;">
+      <span style="flex-shrink:0; width:22px; height:22px; border-radius:50%; background:#e7e0cd; color:#9a7e3c; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; font-family:'Newsreader',serif;">i</span>
+      <div style="font-size:13px; line-height:1.6; color:#7c7868;"><strong style="color:#5f5b4d; font-weight:700;">{{ L.disclaimerStrong }}</strong> {{ L.disclaimer }}</div>
+    </footer>
+
+    <!-- VERSION TIMESTAMP -->
+    <div style="font-family:ui-monospace,'SF Mono',Menlo,monospace; font-size:11.5px; color:#a9a596; text-align:center;">{{ versionLine }}</div>
+
+  </div>
+
+  <sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+    <div style="position:fixed; left:50%; bottom:28px; transform:translateX(-50%); padding:13px 20px; background:#222a36; color:#fff; font-size:14px; font-weight:500; border-radius:11px; box-shadow:0 12px 30px -10px rgba(0,0,0,.4); animation:toastIn .25s ease; z-index:50;">{{ toast }}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    lang: 'es',
+    mode: 'duration',
+    arrival: '2026-01-31',
+    duration: 90,
+    departure: '2026-04-30',
+    showTable: false,
+    email: '',
+    emailSent: false,
+    toast: '',
+    isMobile: false,
+  };
+
+  componentDidMount(){
+    this._mq = window.matchMedia('(max-width: 640px)');
+    this._onMq = (e)=>this.setState({ isMobile: e.matches });
+    this.setState({ isMobile: this._mq.matches });
+    if(this._mq.addEventListener) this._mq.addEventListener('change', this._onMq);
+    else this._mq.addListener(this._onMq);
+  }
+  componentWillUnmount(){
+    if(!this._mq) return;
+    if(this._mq.removeEventListener) this._mq.removeEventListener('change', this._onMq);
+    else this._mq.removeListener(this._onMq);
+  }
+
+  parse(s){ if(!s) return null; const p = s.split('-').map(Number); if(p.length!==3 || p.some(isNaN)) return null; return Date.UTC(p[0], p[1]-1, p[2]); }
+  addDays(t,n){ return t + n*86400000; }
+  diff(a,b){ return Math.round((a-b)/86400000); }
+  pad(n){ return String(n).padStart(2,'0'); }
+  fmt(t){ if(t==null||isNaN(t)) return '—'; const d=new Date(t); return this.pad(d.getUTCDate())+'/'+this.pad(d.getUTCMonth()+1)+'/'+d.getUTCFullYear(); }
+  fmtLong(t,lang){ if(t==null||isNaN(t)) return '—'; const d=new Date(t);
+    const Mes=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+    const Men=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const Mpt=['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+    if(lang==='en') return Men[d.getUTCMonth()]+' '+d.getUTCDate()+', '+d.getUTCFullYear();
+    if(lang==='pt') return d.getUTCDate()+' de '+Mpt[d.getUTCMonth()]+' de '+d.getUTCFullYear();
+    return d.getUTCDate()+' de '+Mes[d.getUTCMonth()]+', '+d.getUTCFullYear();
+  }
+
+  setLang(l){ this.setState({ lang:l }); }
+  setMode(m){ this.setState({ mode:m }); }
+  onArrival(e){ this.setState({ arrival:e.target.value }); }
+  onDuration(e){ const v=e.target.value; this.setState({ duration: v==='' ? '' : Math.max(1, parseInt(v)||1) }); }
+  onDeparture(e){ this.setState({ departure:e.target.value }); }
+  onEmail(e){ this.setState({ email:e.target.value }); }
+  toggleTable(){ this.setState(s=>({ showTable:!s.showTable })); }
+  showToast(msg){ this.setState({ toast:msg }); clearTimeout(this._tt); this._tt=setTimeout(()=>this.setState({ toast:'' }), 2600); }
+  onEmailSubmit(e){ e.preventDefault(); if(!this.state.email) return; this.setState({ emailSent:true }); }
+  onPdf(){ window.print(); }
+  onShare(){ const L=this.strings(this.state.lang); try{ navigator.clipboard.writeText(window.location.href); }catch(_){}
+    this.showToast(L.linkCopied); }
+  onAdvisor(){ const L=this.strings(this.state.lang); this.showToast(L.advisorToast); }
+
+  strings(lang){
+    if(lang==='en') return {
+      badge:'Immigration deadline planner', title:'Student stay calculator',
+      subtitle:'Know your key dates at a glance. Your application must be filed within the first 30 days of arrival, and the course must start at least 60 days after your application, always before your legal tourist stay ends.',
+      detailsTitle:'Calculation details', autoUpdate:'Results update automatically', defineStay:'Define your tourist stay',
+      byDuration:'By duration (days)', byDeparture:'By departure date',
+      arrivalLabel:'Arrival date', durationLabel:'Length of stay (days)', departureLabel:'Departure date (tourist)',
+      durHelper:'Calculated length of stay: ',
+      heroLabel:'Deadline to apply', salidaLabel:'Tourist stay ends', cursoLabel:'Course start window', cursoHint:'If you apply on the deadline',
+      timelineTitle:'Your timeline', tableTitle:'Daily application breakdown',
+      tableNote:'The course start window is an estimate of 60 days from application; always check the specific requirements for your case.',
+      thDate:'Application date', thRest:'Days left', thWindow:'Course start window', thTur:'Tourist days',
+      statPres:'Days to apply', statTur:'Tourist days', daysShort:'d',
+      ctaTitle:'Save your dates and get reminders', ctaSub:'We\u2019ll email your deadline calendar and a reminder before each key date.',
+      emailPh:'you@email.com', sendBtn:'Send to my email', pdfBtn:'Download PDF', shareBtn:'Share link',
+      sentMsg:'Done! Check your inbox to confirm.', linkCopied:'Link copied to clipboard',
+      advisorText:'Special case? An immigration advisor can review your dates with you.', advisorBtn:'Talk to an advisor', advisorToast:'Thanks! An advisor will be in touch.',
+      disclaimerStrong:'Disclaimer.', disclaimer:'This tool is for guidance and planning only. Calculations are based on general regulations and may not apply to your specific case. This information is not legal advice. For official, accurate guidance, consult an immigration lawyer or the relevant consular authorities.',
+      bIncT:'Complete the details', bIncX:'Enter an arrival date and a valid stay to see your deadlines.',
+      bShortT:'Stay too short', bShortX:'Your tourist stay leaves no room for the 60-day course start. You need at least 61 days for a viable plan.',
+      bOkT:'Your plan works',
+      waitingTitle:'Waiting for your dates', waitingText:'Enter your arrival date and stay above to see your filing deadline and timeline.',
+      msLabels:['Arrival in the country','Deadline to apply','Course start window','Tourist stay ends'],
+      govArr:'Set by the 30-day limit from your arrival.', govSal:'Set by the 60-day margin before your departure.',
+      version:'Page version loaded: ',
+    };
+    if(lang==='pt') return {
+      badge:'Planejador de prazos migratórios', title:'Calculadora de estadia de estudante',
+      subtitle:'Conheça suas datas-chave de relance. A solicitação deve ser apresentada nos primeiros 30 dias após a chegada, e o curso deve começar pelo menos 60 dias depois da solicitação, sempre antes do fim da sua estadia legal como turista.',
+      detailsTitle:'Detalhes do cálculo', autoUpdate:'Os resultados são atualizados automaticamente', defineStay:'Defina sua estadia de turista',
+      byDuration:'Por duração (dias)', byDeparture:'Por data de saída',
+      arrivalLabel:'Data de chegada', durationLabel:'Duração da estadia (dias)', departureLabel:'Data de saída (turista)',
+      durHelper:'Duração da estadia calculada: ',
+      heroLabel:'Data limite para apresentar', salidaLabel:'Saída como turista', cursoLabel:'Janela de início do curso', cursoHint:'Se apresentar na data limite',
+      timelineTitle:'Sua linha do tempo', tableTitle:'Detalhamento diário de apresentação',
+      tableNote:'A janela de início do curso é uma estimativa de 60 dias a partir da apresentação; verifique sempre os requisitos específicos do seu caso.',
+      thDate:'Data de apresentação', thRest:'Dias rest.', thWindow:'Janela início do curso', thTur:'Dias turista',
+      statPres:'Dias p/ apresentar', statTur:'Dias de turista', daysShort:'d',
+      ctaTitle:'Salve suas datas e receba lembretes', ctaSub:'Enviamos seu calendário de prazos e um aviso antes de cada data-chave.',
+      emailPh:'voce@email.com', sendBtn:'Enviar para meu e-mail', pdfBtn:'Baixar PDF', shareBtn:'Compartilhar link',
+      sentMsg:'Pronto! Verifique seu e-mail para confirmar.', linkCopied:'Link copiado para a área de transferência',
+      advisorText:'Caso especial? Um consultor de imigração pode revisar suas datas com você.', advisorBtn:'Falar com um consultor', advisorToast:'Obrigado! Um consultor entrará em contato.',
+      disclaimerStrong:'Aviso legal.', disclaimer:'Esta ferramenta é apenas para fins de orientação e planejamento. Os cálculos baseiam-se em normas gerais e podem não se aplicar ao seu caso específico. Esta informação não constitui assessoria jurídica. Para orientação oficial e precisa, consulte um advogado de imigração ou as autoridades consulares competentes.',
+      bIncT:'Complete os dados', bIncX:'Informe uma data de chegada e uma estadia válida para ver seus prazos.',
+      bShortT:'Estadia muito curta', bShortX:'Sua estadia como turista não deixa margem para os 60 dias de início do curso. Você precisa de pelo menos 61 dias para um plano viável.',
+      bOkT:'Seu plano é viável',
+      waitingTitle:'Aguardando suas datas', waitingText:'Informe sua data de chegada e estadia acima para ver seu prazo de apresentação e a linha do tempo.',
+      msLabels:['Chegada ao país','Data limite para apresentar','Janela de início do curso','Fim da estadia como turista'],
+      govArr:'Determinada pelo prazo de 30 dias desde a sua chegada.', govSal:'Determinada pela margem de 60 dias antes da sua saída.',
+      version:'Versão da página carregada: ',
+    };
+    return {
+      badge:'Planificador de plazos migratorios', title:'Calculadora de estancia de estudiante',
+      subtitle:'Conoce tus fechas clave de un vistazo. La solicitud debe presentarse dentro de los primeros 30 días de tu llegada, y el curso debe iniciar al menos 60 días después de tu solicitud, siempre antes de que termine tu estancia legal como turista.',
+      detailsTitle:'Detalles del cálculo', autoUpdate:'Los resultados se actualizan automáticamente', defineStay:'Define tu estancia de turista',
+      byDuration:'Por duración (días)', byDeparture:'Por fecha de salida',
+      arrivalLabel:'Fecha de llegada', durationLabel:'Duración de la estancia (días)', departureLabel:'Fecha de salida (turista)',
+      durHelper:'Duración de la estancia calculada: ',
+      heroLabel:'Fecha límite para presentar', salidaLabel:'Salida como turista', cursoLabel:'Ventana de inicio del curso', cursoHint:'Si presentas en la fecha límite',
+      timelineTitle:'Tu línea de tiempo', tableTitle:'Desglose diario de presentación',
+      tableNote:'La ventana de inicio del curso es una estimación de 60 días desde la presentación; revisa siempre los requisitos específicos de tu caso.',
+      thDate:'Fecha de presentación', thRest:'Días rest.', thWindow:'Ventana inicio del curso', thTur:'Días turista',
+      statPres:'Días p/ presentar', statTur:'Días de turista', daysShort:'d',
+      ctaTitle:'Guarda tus fechas y recibe recordatorios', ctaSub:'Te enviamos tu calendario de plazos y un aviso antes de cada fecha clave.',
+      emailPh:'tu@correo.com', sendBtn:'Enviar a mi correo', pdfBtn:'Descargar PDF', shareBtn:'Compartir enlace',
+      sentMsg:'¡Listo! Revisa tu correo para confirmar.', linkCopied:'Enlace copiado al portapapeles',
+      advisorText:'¿Tu caso es especial? Un asesor de inmigración puede revisar tus fechas contigo.', advisorBtn:'Hablar con un asesor', advisorToast:'¡Gracias! Un asesor te contactará pronto.',
+      disclaimerStrong:'Descargo de responsabilidad.', disclaimer:'Esta herramienta es solo para fines orientativos y de planificación. Los cálculos se basan en normativas generales y pueden no aplicar a tu caso específico. La información no constituye asesoría legal. Para asesoramiento oficial y preciso, consulta con un abogado de inmigración o con las autoridades consulares correspondientes.',
+      bIncT:'Completa los datos', bIncX:'Introduce una fecha de llegada y una estancia válida para ver tus plazos.',
+      bShortT:'Estancia demasiado corta', bShortX:'Tu estancia como turista no deja margen para los 60 días de inicio de curso. Necesitas al menos 61 días para que el plan sea viable.',
+      bOkT:'Tu plan es viable',
+      waitingTitle:'Esperando tus fechas', waitingText:'Introduce tu fecha de llegada y estancia arriba para ver tu fecha límite y tu línea de tiempo.',
+      msLabels:['Llegada al país','Fecha límite para presentar','Ventana de inicio del curso','Fin de estancia como turista'],
+      govArr:'Determinada por el plazo de 30 días desde tu llegada.', govSal:'Determinada por el margen de 60 días antes de tu salida.',
+      version:'Versión de página cargada: ',
+    };
+  }
+
+  renderVals(){
+    const st = this.state;
+    const L = this.strings(st.lang);
+    const mob = st.isMobile;
+    const arrival = this.parse(st.arrival);
+    const mode = st.mode;
+    let salida, durationDays;
+    if(mode==='duration'){
+      const dur = parseInt(st.duration)||0;
+      durationDays = dur;
+      salida = (arrival!=null && dur>0) ? this.addDays(arrival, dur-1) : null;
+    } else {
+      salida = this.parse(st.departure);
+      durationDays = (arrival!=null && salida!=null) ? this.diff(salida, arrival)+1 : 0;
+    }
+    const ready = arrival!=null && salida!=null && salida>arrival;
+    const limiteByArrival = arrival!=null ? this.addDays(arrival, 29) : null;
+    const limiteBySalida = salida!=null ? this.addDays(salida, -60) : null;
+    const limite = ready ? Math.min(limiteByArrival, limiteBySalida) : null;
+    const feasible = ready && limite>=arrival && salida >= this.addDays(arrival, 60);
+    const governedBy = (limiteByArrival!=null && limiteBySalida!=null && limiteByArrival<=limiteBySalida) ? 'arrival' : 'salida';
+    const governedNote = ready ? (governedBy==='arrival' ? L.govArr : L.govSal) : '';
+
+    const seg=(active)=>"padding:10px 16px; min-height:44px; font-family:'Public Sans',sans-serif; font-size:14px; font-weight:600; border:none; border-radius:8px; cursor:pointer; "+(active?"background:#26385f; color:#fff; box-shadow:0 1px 2px rgba(20,28,48,.25);":"background:transparent; color:#646c7a;");
+    const lseg=(active)=>"padding:7px 12px; font-family:'Public Sans',sans-serif; font-size:12.5px; font-weight:700; border:none; border-radius:7px; cursor:pointer; "+(active?"background:#222a36; color:#fff;":"background:transparent; color:#7a8290;");
+
+    let bannerStyle, bannerIcon, bannerIconStyle, bannerTitle, bannerTitleColor, bannerText;
+    const base = "border-radius:14px; padding:18px 20px; margin-bottom:22px; border:1px solid ";
+    const okText = { es:('Tienes hasta el '+this.fmt(limite)+' para presentar tu solicitud, con tiempo suficiente para iniciar el curso antes de finalizar tu estancia.'),
+      en:('You have until '+this.fmt(limite)+' to submit your application, with enough time to start the course before your stay ends.'),
+      pt:('Você tem até '+this.fmt(limite)+' para apresentar sua solicitação, com tempo suficiente para começar o curso antes do fim da sua estadia.') };
+    if(!ready){
+      bannerStyle=base+"#e1dccd; background:#faf8f1;"; bannerIcon='!'; bannerTitle=L.bIncT; bannerTitleColor='#7c6f4a';
+      bannerIconStyle="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:#ece2c6; color:#9a7e3c; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px;";
+      bannerText=L.bIncX;
+    } else if(!feasible){
+      bannerStyle=base+"#eccfcb; background:#fbeeec;"; bannerIcon='✕'; bannerTitle=L.bShortT; bannerTitleColor='#9c3a34';
+      bannerIconStyle="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:#f1d6d2; color:#b23b3b; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;";
+      bannerText=L.bShortX;
+    } else {
+      bannerStyle=base+"#cfe4d6; background:#eef6f0;"; bannerIcon='✓'; bannerTitle=L.bOkT; bannerTitleColor='#2c6b48';
+      bannerIconStyle="flex-shrink:0; width:26px; height:26px; border-radius:50%; background:#d6ecdd; color:#2f7d52; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px;";
+      bannerText = okText[st.lang];
+    }
+
+    const presentWindow = ready ? this.diff(limite, arrival)+1 : 0;
+    const availUnit = { es:(presentWindow===1?' día disponible para presentar':' días disponibles para presentar'),
+      en:(presentWindow===1?' day available to apply':' days available to apply'),
+      pt:(presentWindow===1?' dia disponível para apresentar':' dias disponíveis para apresentar') };
+    const enterStr = { es:'Introduce tus datos', en:'Enter your details', pt:'Informe seus dados' };
+    const daysAvailStr = ready ? (presentWindow+availUnit[st.lang]) : enterStr[st.lang];
+    const totalStr = { es:('Estancia total de '+durationDays+' días'), en:('Total stay of '+durationDays+' days'), pt:('Estadia total de '+durationDays+' dias') };
+    const totalDaysStr = ready ? totalStr[st.lang] : '—';
+    const cursoStart = ready ? this.addDays(limite,60) : null;
+    const cursoWindow = (ready && cursoStart<=salida) ? (this.fmt(cursoStart)+' – '+this.fmt(salida)) : '—';
+
+    // departure-mode helper line
+    const showDurHelper = mode==='departure' && ready;
+    const durHelperText = showDurHelper ? (L.durHelper + durationDays + (st.lang==='en'?' days.':(st.lang==='pt'?' dias.':' días.'))) : '';
+
+    const dot=(bg,col,bd)=>"width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; font-family:'Public Sans',sans-serif; background:"+bg+"; color:"+col+"; border:"+bd+";";
+    const line="flex:1; width:2px; background:#eae6da; margin:4px 0;";
+    const lineLast="flex:1; width:2px; background:transparent;";
+    const dur = durationDays||'—';
+    const descSets = {
+      es:['Inicia tu estancia como turista. El reloj de los 30 días empieza hoy.', governedNote+' Es tu fecha más importante.', 'El curso puede comenzar a partir de los 60 días desde tu solicitud.', 'Último día de tu estancia legal de '+dur+' días como turista.'],
+      en:['Your tourist stay begins. The 30-day clock starts today.', governedNote+' This is your most important date.', 'The course can begin from 60 days after your application.', 'Last day of your legal '+dur+'-day tourist stay.'],
+      pt:['Começa sua estadia como turista. O relógio dos 30 dias começa hoje.', governedNote+' É sua data mais importante.', 'O curso pode começar a partir de 60 dias após a sua solicitação.', 'Último dia da sua estadia legal de '+dur+' dias como turista.'],
+    };
+    const descs = descSets[st.lang];
+    const dates = [this.fmt(arrival), this.fmt(limite), cursoWindow, this.fmt(salida)];
+    const milestones = L.msLabels.map((lab,i)=>({
+      n:String(i+1), date:dates[i], label:lab, desc:descs[i],
+      dateColor: i===1 ? '#26385f' : '#1b2433',
+      dotStyle: i===1 ? dot('#26385f','#fff','1px solid #26385f') : (i===2 ? dot('#eef6f0','#2f7d52','1px solid #cfe4d6') : dot('#f1efe8','#646c7a','1px solid #ddd8cc')),
+      lineStyle: i===3 ? lineLast : line,
+    }));
+
+    const rows=[];
+    if(feasible){ let k=0; for(let t=arrival; t<=limite; t=this.addDays(t,1)){
+      const rest=this.diff(limite,t)+1; const urgent=rest<=7;
+      rows.push({ fecha:this.fmt(t), restPres:rest, cursoRange:this.fmt(this.addDays(t,60))+' – '+this.fmt(salida), restTur:this.diff(salida,t)+1,
+        rowStyle:'border-top:1px solid #f0eee6;'+(k%2?'background:#fbfaf6;':'background:#fff;'),
+        pillStyle:'display:inline-flex; align-items:center; justify-content:center; min-width:30px; height:24px; padding:0 9px; border-radius:7px; font-size:13px; font-weight:700; '+(urgent?'background:#fbeeec; color:#b23b3b;':'background:#ffffff; color:#28406e; border:1px solid #d7deec;') });
+      k++;
+    }}
+    const subStr = { es:(rows.length+' fechas posibles · día a día'), en:(rows.length+' possible dates · day by day'), pt:(rows.length+' datas possíveis · dia a dia') };
+    const tableSubStr = subStr[st.lang];
+
+    // version timestamp
+    const now = new Date();
+    const versionLine = L.version + this.pad(now.getDate())+'/'+this.pad(now.getMonth()+1)+'/'+now.getFullYear()+' '+this.pad(now.getHours())+':'+this.pad(now.getMinutes());
+
+    return {
+      L,
+      pagePad: mob ? '20px 16px 56px' : '32px 24px 72px',
+      h1Size: mob ? '31px' : '44px',
+      heroSize: mob ? '31px' : '38px',
+      cardPad: mob ? '20px' : '26px',
+      inputCols: mob ? '1fr' : '1fr 1fr',
+      resultsCols: mob ? '1fr' : '1.25fr 1fr',
+      arrival:st.arrival, duration:st.duration, departure:st.departure,
+      showDuration: mode==='duration', showDeparture: mode==='departure',
+      showDurHelper, durHelperText,
+      esBtnStyle:lseg(st.lang==='es'), enBtnStyle:lseg(st.lang==='en'), ptBtnStyle:lseg(st.lang==='pt'),
+      durBtnStyle:seg(mode==='duration'), depBtnStyle:seg(mode==='departure'),
+      setEs:()=>this.setLang('es'), setEn:()=>this.setLang('en'), setPt:()=>this.setLang('pt'),
+      setDuration:()=>this.setMode('duration'), setDepartureMode:()=>this.setMode('departure'),
+      onArrival:(e)=>this.onArrival(e), onDuration:(e)=>this.onDuration(e), onDeparture:(e)=>this.onDeparture(e),
+      bannerStyle, bannerIcon, bannerIconStyle, bannerTitle, bannerTitleColor, bannerText,
+      showWaiting: !feasible, showResults: feasible,
+      showDesktopTable: !mob, showMobileCards: mob,
+      limiteLong: ready ? this.fmtLong(limite, st.lang) : '—',
+      limiteShort: ready ? this.fmt(limite) : enterStr[st.lang],
+      daysAvailStr, governedNote, salidaShort: ready ? this.fmt(salida) : '—', totalDaysStr, cursoWindow,
+      milestones, rows, tableSubStr, showTable: st.showTable, toggleTable:()=>this.toggleTable(),
+      chevron: st.showTable?'▲':'▼',
+      chevronStyle:'flex-shrink:0; width:30px; height:30px; border-radius:8px; background:#f1efe8; color:#646c7a; display:flex; align-items:center; justify-content:center; font-size:11px;',
+      email:st.email, onEmail:(e)=>this.onEmail(e), onEmailSubmit:(e)=>this.onEmailSubmit(e),
+      emailSent:st.emailSent, emailNotSent:!st.emailSent,
+      onPdf:()=>this.onPdf(), onShare:()=>this.onShare(), onAdvisor:()=>this.onAdvisor(),
+      toast:st.toast, versionLine,
+    };
+  }
+}
+</script>
+</body>
+</html>

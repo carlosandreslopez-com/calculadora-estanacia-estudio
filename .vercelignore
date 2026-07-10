@@ -3,6 +3,7 @@
 CLAUDE.md
 WORKLOG.md
 README.md
+.docs
 
 # CI workflows — not needed for the build
 .github

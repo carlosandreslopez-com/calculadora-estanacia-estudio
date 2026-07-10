@@ -11,9 +11,10 @@ This project uses **pnpm** (see `packageManager` in `package.json`). Use `pnpm`,
 - `pnpm build` — production build via Astro (static output to `dist/`)
 - `pnpm preview` — serve the built `dist/` locally
 - `pnpm check` — type-check `.astro`/`.ts`/`.tsx` via `astro check` (`@astrojs/check` + `typescript` are installed as devDependencies)
+- `pnpm test` — run the Vitest unit tests (`src/services/calculationService.test.ts`)
 - `pnpm astro add <integration>` — Astro CLI passthrough
 
-This is an **Astro 7** project with a **React 19** island (`@astrojs/react`). There is **no test runner, linter, or formatter** configured. `astro build` does not type-check — run `pnpm check` for that; it should report **0 errors, 0 warnings, 0 hints** (CI/pre-commit gate).
+This is an **Astro 7** project with a **React 19** island (`@astrojs/react`). There is **no linter or formatter** configured; tests run via **Vitest**. `astro build` does not type-check — run `pnpm check` for that; it should report **0 errors, 0 warnings, 0 hints**. Gate before committing: `pnpm test` green + `pnpm check` 0/0/0.
 
 ### Conventions for contributors (humans & agents)
 
@@ -27,31 +28,31 @@ A single-page calculator (UI entirely in Spanish) for Spain's student-residency 
 
 ## Core domain logic
 
-Everything that matters lives in `src/services/calculationService.ts` — `calculateStudyStayBreakdown()`. The two business rules are encoded as constants:
+Everything that matters lives in `src/services/calculationService.ts` — `calculateStudyStayBreakdown()`. The business rules are encoded as constants:
 
-- `PRESENTATION_WINDOW_DAYS = 30` — the application must be filed within the first 30 days after arrival.
-- `MIN_ANTICIPATION_DAYS = 60` — the course must start at least 60 days after the application is filed, and still before the tourist stay ends.
+- `PRESENTATION_WINDOW_DAYS = 30` / `MIN_ANTICIPATION_DAYS = 60` — day-based rules that still drive the **daily breakdown**: the function walks each of the first 30 days and keeps the presentation dates whose earliest course start (presentation + 60 days) falls on or before the exit date. If no day qualifies it throws a Spanish-language error.
+- `PRESENTATION_WINDOW_MONTHS = 1` / `MIN_ANTICIPATION_MONTHS = 2` — month-based rule for **`maxPresentationDate`** (the headline deadline): the earlier of (arrival + 1 month) and (exit − 2 months), computed "de fecha a fecha" via `addMonthsClamped` (same day number in the target month; clamps to the month's last day when it doesn't exist, e.g. 30/02 → 28/02). **Pending legal confirmation** — the breakdown is intentionally still day-based so both rules can be compared on screen (`ResultsTable` highlights the month-rule row); see WORKLOG 2026-07-10 for the open questions and the planned "Step B" (make the breakdown month-consistent).
 
-The function walks each of the first 30 days, keeps only the presentation dates whose earliest possible course start (presentation + 60 days) falls on or before the exit date, and returns a per-day breakdown plus the latest valid presentation date (`maxPresentationDate`). If no day qualifies it throws a Spanish-language error. When changing these rules, update the constants here and the explanatory copy in `src/components/Header.astro` and `src/components/ResultsTable.tsx`, which restate the 30/60-day rules to the user.
+The rules are covered by tests in `src/services/calculationService.test.ts` — change behavior only with the tests updated in the same commit. When changing rules, also update the explanatory copy in `src/components/Header.astro` and `src/components/ResultsTable.tsx`, which restate them to the user.
 
 ### Date handling (important)
 
-All date math is done in **UTC** to avoid timezone drift (`Date.UTC`, `getUTCDate`, etc.). Dates are parsed from and formatted to `dd/mm/yyyy`. The parse/format/diff helpers are duplicated between `src/services/calculationService.ts` and `src/components/DataEntryForm.tsx` — keep both copies consistent if you touch them.
+All date math is done in **UTC** to avoid timezone drift (`Date.UTC`, `getUTCDate`, etc.). Dates are parsed from and formatted to `dd/mm/yyyy`. The shared helpers live in `src/utils/dateUtils.ts` (`parseSpanishDateUTC` throws Spanish errors — the service contract; `tryParseSpanishDateUTC` returns `null` for live form input; plus `formatDateToSpanish`, `diffInDays`, `addDays`, `addMonthsClamped`, and the `isoToSpanish`/`spanishToIso` boundary converters for native date inputs). Don't re-declare date helpers in components — import from there.
 
 ## Architecture
 
 This is an Astro site whose single page is mostly static HTML, with the interactive calculator as one client-side React island.
 
-- `src/pages/index.astro` owns the page shell (the slate background wrapper, `<main>`, and the static `Header`/`Disclaimer`) and renders the lone island `<Calculator client:only="react" />` inside `src/layouts/Layout.astro`. **`client:only` (not `client:load`) is required** — the calculator touches browser APIs during render, so it must not be server-rendered. (This matches the app's original CSR-only behavior.)
-- `src/layouts/Layout.astro` owns the `<html>`/`<head>`/`<body>` shell, imports `src/styles/global.css`, and sets the `window.APP_VERSION` load-timestamp (read and shown in the footer by `Disclaimer.astro`'s inline script).
-- `src/components/Calculator.tsx` is the only React island: it holds the app state (`result`, `error`) and wraps both interactive children, which share that state. Data flow is one-way: `DataEntryForm` (toggles between "duration" and "exit date" modes) → `Calculator.handleCalculate` → `calculationService` → `ResultsTable` renders the `CalculationResult`. Shared types are in `src/types.ts`.
-- Static shell is native Astro: `src/components/Header.astro` and `src/components/Disclaimer.astro` (ship zero JS). Remaining React components in `src/components/`: `DataEntryForm`, `ResultsTable`, plus the leaf components `CalendarPicker`, `FormLayout`, `IconComponents`.
+- `src/pages/index.astro` owns the page shell (880px container, utility badge, static `Header`/`AdvisorCta`/`Disclaimer`) and renders the lone island `<Calculator client:only="react" />` (with a light `slot="fallback"` skeleton) inside `src/layouts/Layout.astro`. **`client:only` (not `client:load`) is required** — the calculator touches browser APIs during render, so it must not be server-rendered.
+- `src/layouts/Layout.astro` owns the `<html>`/`<head>`/`<body>` shell, imports the `@fontsource` weights + `src/styles/global.css`, sets the meta description/favicon, and sets the `window.APP_VERSION` load-timestamp (read and shown in the footer by `Disclaimer.astro`'s inline script).
+- `src/components/Calculator.tsx` is the only React island. **Results are live (no submit button):** it holds the raw input state (`mode`, `arrivalIso`, `durationStr`, `exitIso`) and derives an `incomplete | error | success` state with `useMemo` around `calculateStudyStayBreakdown` (native `yyyy-mm-dd` values are converted with `isoToSpanish` at this boundary). It renders `DataEntryForm` (controlled inputs reporting up), a `StatusBanner` (`aria-live`), and either `WaitingCard` or the results block (`ResultsSummary` hero/stats/timeline/PDF+share, then the collapsible `ResultsTable`). Shared types in `src/types.ts`; `CalculationParams` is exported by the service.
+- Static shell is native Astro (zero JS): `Header.astro`, `AdvisorCta.astro`, `Disclaimer.astro`. Other React components: `DataEntryForm`, `StatusBanner`, `WaitingCard`, `ResultsSummary`, `ResultsTable`, `IconComponents` (inline SVG set).
 
-> **Stage 2 — done.** The static shell (`Header`, `Disclaimer`, page layout) is now native `.astro`; only the form/results calculator remains a React island. (If reintroducing a static React component, mind that `client:only` islands can't share state with `.astro` siblings — keep co-stateful pieces inside `Calculator.tsx`.)
+> If reintroducing a static React component, mind that `client:only` islands can't share state with `.astro` siblings — keep co-stateful pieces inside `Calculator.tsx`.
 
 ## Styling
 
-Tailwind **v4** is compiled at build time via the `@tailwindcss/vite` plugin (configured in `astro.config.mjs`); the entry is `@import "tailwindcss";` in `src/styles/global.css`, which also holds the custom scrollbar CSS. There is no `tailwind.config` — v4 auto-scans source files for class names. Style exclusively with utility classes inline; the design is a dark slate/sky theme. (Note: migrated from the Tailwind v3 Play CDN, so a few v4 default differences may produce minor visual shifts vs. the original.)
+Tailwind **v4** is compiled at build time via the `@tailwindcss/vite` plugin (configured in `astro.config.mjs`); the entry is `src/styles/global.css`: `@import "tailwindcss";` plus the **`@theme` design-token block** (light "institucional" theme — warm paper bg, navy primary; spec: `.docs/handoff/HANDOFF.md` §1), the `fadeUp`/`toastIn`/`spin` keyframes, the light scrollbar, and the `@media print` rules (`.no-print`). There is no `tailwind.config` — v4 auto-scans source files for class names. Style with utility classes inline, using the token-derived utilities (`bg-surface`, `text-ink`, `border-border`, `font-display`, `rounded-card`, `shadow-card`, …) rather than raw palette classes. Fonts are self-hosted via `@fontsource/newsreader` + `@fontsource/public-sans` (imported in `Layout.astro`; no Google Fonts CDN — GDPR). The hero gradient is the one inline `style` exception (per HANDOFF §1.4).
 
 ## Module resolution
 

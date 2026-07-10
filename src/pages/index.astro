@@ -1,25 +1,50 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
+import AdvisorCta from '../components/AdvisorCta.astro';
 import Disclaimer from '../components/Disclaimer.astro';
 import { Calculator } from '../components/Calculator.tsx';
 ---
 
 <Layout>
-  <div class="bg-slate-900 text-slate-200 min-h-screen font-sans flex flex-col items-center p-4 sm:p-6 lg:p-8">
-    <div class="w-full max-w-7xl mx-auto">
+  <div class="min-h-screen px-4 pt-5 pb-14 sm:px-6 sm:pt-8 sm:pb-[72px]">
+    <div class="mx-auto w-full max-w-[880px]">
+      <!-- Utility bar -->
+      <div class="no-print mb-6">
+        <span
+          class="inline-flex items-center gap-2 px-[13px] py-1.5 border border-[#d8d4c8] rounded-full bg-surface-sunken text-[11.5px] font-semibold tracking-[0.06em] uppercase text-[#5f6776]"
+        >
+          <span class="w-[7px] h-[7px] rounded-full bg-success inline-block" aria-hidden="true"></span>
+          Herramienta orientativa · España
+        </span>
+      </div>
+
       <Header />
-      <main class="mt-8 bg-slate-800/50 rounded-xl p-4 sm:p-8 border border-slate-700 shadow-2xl shadow-slate-950/50">
+
+      <main>
         <Calculator client:only="react">
-          <div slot="fallback" class="flex items-center justify-center gap-3 py-20 text-slate-400">
-            <svg class="h-5 w-5 animate-spin text-sky-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-            </svg>
-            <span class="text-sm">Cargando calculadora…</span>
+          <div
+            slot="fallback"
+            class="bg-surface border border-border rounded-card shadow-card p-6 sm:p-7"
+          >
+            <div class="flex items-center justify-center gap-3 py-16 text-muted-2">
+              <svg
+                class="h-5 w-5 animate-spin text-primary"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+              </svg>
+              <span class="text-sm">Cargando calculadora…</span>
+            </div>
           </div>
         </Calculator>
       </main>
+
+      <AdvisorCta />
       <Disclaimer />
     </div>
   </div>

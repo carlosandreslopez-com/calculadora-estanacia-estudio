@@ -1,43 +1,14 @@
 import type { BreakdownRow, CalculationResult } from '../types.ts';
-
-// Helper to add days to a date, avoiding timezone issues by working in UTC
-const addDays = (date: Date, days: number): Date => {
-    const result = new Date(date);
-    result.setUTCDate(result.getUTCDate() + days);
-    return result;
-};
-
-// Helper to parse date string from 'DD/MM/YYYY' format into a UTC Date object
-const parseSpanishDateUTC = (dateString: string): Date => {
-    if (!dateString) {
-        throw new Error('La fecha es obligatoria.');
-    }
-    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
-        throw new Error(`Formato de fecha inválido: "${dateString}". Use dd/mm/aaaa.`);
-    }
-    
-    const parts = dateString.split('/').map(part => parseInt(part, 10));
-    const [day, month, year] = parts;
-
-    const date = new Date(Date.UTC(year, month - 1, day));
-
-    if (isNaN(date.getTime()) || date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
-        throw new Error(`Fecha inválida: "${dateString}". Verifique el día y el mes.`);
-    }
-    return date;
-};
-
-
-const diffInDays = (date1: Date, date2: Date): number => {
-    const msPerDay = 1000 * 60 * 60 * 24;
-    // Calculate the difference in milliseconds and convert to days
-    return Math.round((date1.getTime() - date2.getTime()) / msPerDay);
-};
+import { addDays, addMonthsClamped, diffInDays, parseSpanishDateUTC } from '../utils/dateUtils.ts';
 
 const MIN_ANTICIPATION_DAYS = 60;
 const PRESENTATION_WINDOW_DAYS = 30;
+// Month-based rule for the max presentation date (pending legal confirmation;
+// the daily breakdown still uses the day-based constants above).
+const PRESENTATION_WINDOW_MONTHS = 1;
+const MIN_ANTICIPATION_MONTHS = 2;
 
-interface CalculationParams {
+export interface CalculationParams {
   arrivalDate: string;
   stayDuration?: string;
   exitDate?: string;
@@ -103,7 +74,16 @@ export const calculateStudyStayBreakdown = (
         remainingPresentationDays: arr.length - index,
     }));
 
-    const maxPresentationDate = finalBreakdown[finalBreakdown.length - 1].presentationDate;
+    // Max presentation date under month-based computation: the earlier of
+    // (arrival + 1 month) and (exit − 2 months), each clamped to month end.
+    // Note it may differ from the last breakdown row, which still follows the
+    // day-based 30/60 rule until the month rule is legally confirmed.
+    const presentationLimitByArrival = addMonthsClamped(arrivalDate, PRESENTATION_WINDOW_MONTHS);
+    const presentationLimitByExit = addMonthsClamped(exitDate, -MIN_ANTICIPATION_MONTHS);
+    const maxPresentationDate =
+        presentationLimitByArrival.getTime() <= presentationLimitByExit.getTime()
+            ? presentationLimitByArrival
+            : presentationLimitByExit;
 
     return {
         arrivalDate,
