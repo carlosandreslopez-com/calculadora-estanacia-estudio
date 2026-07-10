@@ -64,6 +64,15 @@ export const formatDateToSpanish = (date: Date): string => {
     return `${day}/${month}/${year}`;
 };
 
+// Format a Date to the long Spanish form used by the hero card, e.g. "12 de agosto, 2026"
+const SPANISH_MONTHS = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+];
+
+export const formatDateLongSpanish = (date: Date): string =>
+    `${date.getUTCDate()} de ${SPANISH_MONTHS[date.getUTCMonth()]}, ${date.getUTCFullYear()}`;
+
 // Whole-day difference between two UTC dates (date1 − date2)
 export const diffInDays = (date1: Date, date2: Date): number => {
     const msPerDay = 1000 * 60 * 60 * 24;

@@ -1,190 +1,160 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { CalculationResult } from '../types.ts';
-import { RefreshIcon, DocumentIcon, CalendarIcon } from './IconComponents.tsx';
 import { formatDateToSpanish as formatDate } from '../utils/dateUtils.ts';
+import { ChevronDownIcon } from './IconComponents.tsx';
 
 interface ResultsTableProps {
-  data: CalculationResult | null;
-  onReset: () => void;
+  data: CalculationResult;
 }
 
-const TableHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-    <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{children}</th>
-);
+const TH_CLASS =
+  'text-left text-[11px] font-bold tracking-[0.05em] uppercase text-faint pt-4 pb-2.5';
 
-const TableCell: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className = '' }) => (
-    <td className={`px-4 py-4 whitespace-nowrap text-sm text-slate-300 ${className}`}>{children}</td>
-);
+const daysPill = (rest: number) =>
+  `inline-flex items-center justify-center min-w-[30px] h-6 px-[9px] rounded-[7px] text-[13px] font-bold ${
+    rest <= 7
+      ? 'bg-error-bg text-error'
+      : 'bg-white text-primary-text border border-[#d7deec]'
+  }`;
 
-const SummaryCard: React.FC<{ label: string; date: string; highlight?: boolean }> = ({ label, date, highlight }) => (
-    <div className={`p-4 rounded-lg flex-1 transition-all duration-300 h-full ${highlight ? 'bg-cyan-500 border-2 border-cyan-200 shadow-xl shadow-cyan-400/40' : 'bg-slate-800'}`}>
-        <p className={`text-sm font-medium ${highlight ? 'text-cyan-900' : 'text-slate-400'}`}>{label}</p>
-        <p className={`text-2xl font-bold ${highlight ? 'text-white' : 'text-sky-400'}`}>{date}</p>
-    </div>
-);
+// Row treatment for the month-rule demo: highlight the row equal to the
+// month-based deadline, dim the day-based rows past it (pending legal confirmation).
+const rowDemoState = (rowTime: number, flmpTime: number) =>
+  rowTime === flmpTime ? 'flmp' : rowTime > flmpTime ? 'past' : 'normal';
 
-export const ResultsTable: React.FC<ResultsTableProps> = ({ data, onReset }) => {
-  if (!data) {
-    return (
-      <div className="text-center py-12 px-6 bg-slate-900/50 rounded-lg border border-slate-700">
-        <CalendarIcon className="w-12 h-12 mx-auto text-slate-600" />
-        <h3 className="mt-2 text-lg font-medium text-slate-300">Esperando Cálculo</h3>
-        <p className="mt-1 text-sm text-slate-500">Ingresa tus datos arriba y haz clic en "Calcular" para ver tus fechas límite.</p>
-      </div>
-    );
-  }
+export const ResultsTable: React.FC<ResultsTableProps> = ({ data }) => {
+  const [open, setOpen] = useState(false);
 
   const flmpTime = data.maxPresentationDate.getTime();
+  const rowCount = data.breakdown.length;
 
   return (
-    <div className="flex flex-col">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-          <DocumentIcon className="w-6 h-6 text-slate-400"/>
-          Resultados del Cálculo
-        </h2>
-        <button
-          onClick={onReset}
-          className="flex items-center gap-2 bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200"
-        >
-          <RefreshIcon className="w-5 h-5"/>
-          Nuevo Cálculo
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Swapped source order and used `order-first` to force a visual update and trick caching */}
-        <div className="order-first">
-            <SummaryCard label="Fecha Límite Máx. de Presentación" date={formatDate(data.maxPresentationDate)} highlight />
-        </div>
+    <section className="bg-surface border border-border rounded-card overflow-hidden mb-[22px]">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        className="no-print w-full flex items-center justify-between gap-4 px-6 py-5 bg-transparent border-0 cursor-pointer text-left hover:bg-surface-sunken focus-visible:outline-none focus-visible:shadow-[inset_0_0_0_3px_rgba(40,64,110,0.14)]"
+      >
         <div>
-            <SummaryCard label="Fecha de Salida de Turista Calculada" date={formatDate(data.exitDate)} />
+          <div className="text-[15px] font-bold text-ink-2">Desglose diario de presentación</div>
+          <div className="text-[13px] text-[#8a92a0] mt-0.5">{rowCount} fechas posibles · día a día</div>
         </div>
-      </div>
-       <p className="text-xs text-slate-500 mt-2 mb-8 italic text-center md:text-left">
-         *La fecha límite es la que ocurra primero: 1 mes desde la llegada o 2 meses antes de la salida
-         (cómputo «de fecha a fecha»; si el día equivalente no existe, el último día del mes).
-         Pendiente de confirmación legal.
-       </p>
+        <ChevronDownIcon
+          className={`w-5 h-5 text-muted-2 flex-shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
 
-      <h3 className="text-lg font-semibold text-white mb-2">Desglose Diario de Presentación</h3>
-      <p className="text-xs text-slate-500 mb-2 italic">
-        *El "Rango de Fecha de Inicio del Curso" se basa en una estimación de 60 días desde la presentación, un plazo común pero no un requisito legal estricto. Revise siempre los requisitos específicos de su caso.
-      </p>
-      <p className="text-xs text-amber-400/90 mb-4 italic">
-        *El desglose sigue aún la regla anterior de 30/60 días. La fila resaltada en ámbar es la
-        fecha límite según el cómputo por meses; las filas atenuadas quedarían fuera de plazo bajo
-        esa regla. Si no hay fila resaltada, la fecha límite por meses es posterior a la última fila
-        y todo el desglose es válido.
-      </p>
+      {open && (
+        <div className="border-t border-[#eceae2]">
+          <p className="px-6 pt-3 text-[12.5px] leading-[1.5] text-faint">
+            *El "Rango de Fecha de Inicio del Curso" se basa en una estimación de 60 días desde la presentación, un plazo común pero no un requisito legal estricto. Revise siempre los requisitos específicos de su caso.
+          </p>
+          <p className="px-6 pt-1.5 pb-1 text-[12.5px] leading-[1.5] italic text-warn-accent">
+            *El desglose sigue aún la regla anterior de 30/60 días. La fila resaltada es la fecha
+            límite según el cómputo por meses; las filas atenuadas quedarían fuera de plazo bajo esa
+            regla. Si no hay fila resaltada, la fecha límite por meses es posterior a la última fila
+            y todo el desglose es válido.
+          </p>
 
-      {/* --- Responsive Table/Card List --- */}
-
-      {/* Desktop Table View: Hidden on small screens, visible from 'sm' breakpoint up */}
-      <div className="hidden sm:block -my-2 overflow-x-auto">
-        <div className="py-2 align-middle inline-block min-w-full">
-          <div className="shadow overflow-hidden border-b border-slate-700 sm:rounded-lg">
-            <table className="min-w-full divide-y divide-slate-700">
-              <thead className="bg-slate-800">
+          {/* Desktop table */}
+          <div className="hidden sm:block overflow-x-auto">
+            <table className="w-full border-collapse min-w-[560px]">
+              <thead>
                 <tr>
-                  <TableHeader>Fecha de Presentación</TableHeader>
-                  <TableHeader>Días Restantes (Presentación)</TableHeader>
-                  <TableHeader>Rango de Fecha de Inicio del Curso</TableHeader>
-                  <TableHeader>Días Restantes (Turista)</TableHeader>
+                  <th className={`${TH_CLASS} px-6`}>Fecha de presentación</th>
+                  <th className={`${TH_CLASS} px-3`}>Días rest.</th>
+                  <th className={`${TH_CLASS} px-3`}>Ventana inicio del curso</th>
+                  <th className={`${TH_CLASS} px-6`}>Días turista</th>
                 </tr>
               </thead>
-              <tbody className="bg-slate-900/50 divide-y divide-slate-800">
+              <tbody>
                 {data.breakdown.map((row, index) => {
-                  const isFlmpRow = row.presentationDate.getTime() === flmpTime;
-                  const isPastFlmp = row.presentationDate.getTime() > flmpTime;
+                  const demo = rowDemoState(row.presentationDate.getTime(), flmpTime);
+                  const zebra = index % 2 ? 'bg-surface-sunken' : 'bg-white';
+                  const demoClass =
+                    demo === 'flmp'
+                      ? 'bg-warn-bg shadow-[inset_0_0_0_2px_var(--color-warn-accent)]'
+                      : demo === 'past'
+                        ? `${zebra} opacity-40`
+                        : zebra;
                   return (
-                  <tr
-                    key={index}
-                    className={`transition-colors duration-150 ${
-                      isFlmpRow
-                        ? 'bg-amber-400/15 ring-2 ring-inset ring-amber-400'
-                        : isPastFlmp
-                          ? 'opacity-40 bg-red-900/20 hover:bg-slate-800/60'
-                          : 'hover:bg-slate-800/60'
-                    }`}
-                  >
-                    <TableCell className="font-semibold">
-                      {formatDate(row.presentationDate)}
-                      {isFlmpRow && (
-                        <span className="ml-2 text-[10px] font-bold uppercase tracking-wider bg-amber-400 text-amber-950 rounded px-1.5 py-0.5 align-middle">
-                          Límite (meses)
+                    <tr key={index} className={`border-t border-[#f0eee6] ${demoClass}`}>
+                      <td className="px-6 py-[13px] text-sm font-semibold text-ink-2 whitespace-nowrap">
+                        {formatDate(row.presentationDate)}
+                        {demo === 'flmp' && (
+                          <span className="ml-2 text-[10px] font-bold uppercase tracking-wider bg-warn-accent text-white rounded px-1.5 py-0.5 align-middle">
+                            Límite (meses)
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 py-[13px]">
+                        <span className={daysPill(row.remainingPresentationDays)}>
+                          {row.remainingPresentationDays}
                         </span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                        <span className="inline-block text-center w-8 h-8 leading-8 rounded-full bg-slate-700 font-bold text-sky-300">
-                            {row.remainingPresentationDays}
-                        </span>
-                    </TableCell>
-                    <TableCell>{`${formatDate(row.courseStartDateMin)} - ${formatDate(data.exitDate)}`}</TableCell>
-                    <TableCell>{row.remainingTouristDays}</TableCell>
-                  </tr>
+                      </td>
+                      <td className="px-3 py-[13px] text-[13.5px] text-[#5f6776] whitespace-nowrap">
+                        {`${formatDate(row.courseStartDateMin)} – ${formatDate(data.exitDate)}`}
+                      </td>
+                      <td className="px-6 py-[13px] text-sm text-[#5f6776]">{row.remainingTouristDays}</td>
+                    </tr>
                   );
                 })}
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
 
-      {/* Mobile Card View: Visible only on small screens, hidden from 'sm' up */}
-      <div className="block sm:hidden space-y-3">
-        {data.breakdown.map((row, index) => {
-          const isFlmpRow = row.presentationDate.getTime() === flmpTime;
-          const isPastFlmp = row.presentationDate.getTime() > flmpTime;
-          return (
-          <div
-            key={index}
-            className={`p-4 rounded-lg border shadow-md ${
-              isFlmpRow
-                ? 'bg-amber-400/15 border-amber-400 ring-1 ring-amber-400'
-                : isPastFlmp
-                  ? 'bg-red-900/20 border-slate-700 opacity-40'
-                  : 'bg-slate-800/70 border-slate-700'
-            }`}
-          >
-            {/* Top row: Presentation Date */}
-            <div className="flex justify-between items-baseline pb-3 mb-3 border-b border-slate-700/50">
-              <span className="text-sm font-medium text-slate-400">
-                Fecha Presentación
-                {isFlmpRow && (
-                  <span className="ml-2 text-[10px] font-bold uppercase tracking-wider bg-amber-400 text-amber-950 rounded px-1.5 py-0.5 align-middle">
-                    Límite (meses)
-                  </span>
-                )}
-              </span>
-              <span className="text-base font-semibold text-white">{formatDate(row.presentationDate)}</span>
-            </div>
-
-            {/* Middle: Remaining days stats */}
-            <div className="flex justify-around items-center mb-3">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-sky-400">{row.remainingPresentationDays}</p>
-                <p className="text-xs text-slate-400 uppercase tracking-wider">Días P/ Presentar</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-slate-300">{row.remainingTouristDays}</p>
-                <p className="text-xs text-slate-400 uppercase tracking-wider">Días de Turista</p>
-              </div>
-            </div>
-            
-            {/* Bottom: Course Date Range */}
-            <div>
-              <div className="text-sm font-medium text-slate-400 mb-1 text-center">Rango Válido de Inicio del Curso</div>
-              <div className="text-sm text-center font-mono bg-slate-900/80 p-2 rounded-md text-emerald-300 tracking-tight">
-                {`${formatDate(row.courseStartDateMin)} → ${formatDate(data.exitDate)}`}
-              </div>
-            </div>
+          {/* Mobile stacked cards */}
+          <div className="sm:hidden p-4 flex flex-col gap-3">
+            {data.breakdown.map((row, index) => {
+              const demo = rowDemoState(row.presentationDate.getTime(), flmpTime);
+              const demoClass =
+                demo === 'flmp'
+                  ? 'border-warn-accent ring-1 ring-warn-accent bg-warn-bg'
+                  : demo === 'past'
+                    ? 'border-[#ece9e0] bg-surface-sunken opacity-40'
+                    : 'border-[#ece9e0] bg-surface-sunken';
+              return (
+                <div key={index} className={`border rounded-[13px] p-4 ${demoClass}`}>
+                  <div className="flex items-center justify-between gap-2.5 mb-3.5">
+                    <span className="text-[15px] font-bold text-ink-2">
+                      {formatDate(row.presentationDate)}
+                      {demo === 'flmp' && (
+                        <span className="ml-2 text-[10px] font-bold uppercase tracking-wider bg-warn-accent text-white rounded px-1.5 py-0.5 align-middle">
+                          Límite (meses)
+                        </span>
+                      )}
+                    </span>
+                    <span className={daysPill(row.remainingPresentationDays)}>
+                      {row.remainingPresentationDays} d
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2.5 mb-3">
+                    <div className="bg-white border border-[#ece9e0] rounded-[10px] px-[13px] py-[11px]">
+                      <div className="text-[22px] font-bold text-primary leading-none">
+                        {row.remainingPresentationDays}
+                      </div>
+                      <div className="text-[11.5px] text-[#8a92a0] mt-[5px] leading-[1.3]">Días p/ presentar</div>
+                    </div>
+                    <div className="bg-white border border-[#ece9e0] rounded-[10px] px-[13px] py-[11px]">
+                      <div className="text-[22px] font-bold text-ink-2 leading-none">{row.remainingTouristDays}</div>
+                      <div className="text-[11.5px] text-[#8a92a0] mt-[5px] leading-[1.3]">Días de turista</div>
+                    </div>
+                  </div>
+                  <div className="bg-success-bg border border-success-border rounded-[10px] px-[13px] py-2.5">
+                    <div className="text-[10.5px] font-bold tracking-[0.05em] uppercase text-[#5b9374] mb-[3px]">
+                      Ventana inicio del curso
+                    </div>
+                    <div className="text-[13.5px] font-semibold text-success-ink">
+                      {`${formatDate(row.courseStartDateMin)} – ${formatDate(data.exitDate)}`}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          );
-        })}
-      </div>
-      
-    </div>
+        </div>
+      )}
+    </section>
   );
 };

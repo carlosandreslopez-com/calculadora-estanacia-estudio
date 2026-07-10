@@ -8,7 +8,7 @@ const PRESENTATION_WINDOW_DAYS = 30;
 const PRESENTATION_WINDOW_MONTHS = 1;
 const MIN_ANTICIPATION_MONTHS = 2;
 
-interface CalculationParams {
+export interface CalculationParams {
   arrivalDate: string;
   stayDuration?: string;
   exitDate?: string;
