@@ -34,8 +34,22 @@ const diffInDays = (date1: Date, date2: Date): number => {
     return Math.round((date1.getTime() - date2.getTime()) / msPerDay);
 };
 
+// Month-based deadline arithmetic ("de fecha a fecha", Ley 39/2015): the deadline
+// falls on the same day number in the target month; if that day does not exist
+// (e.g. 30/02), it clamps to the last day of that month. Works in UTC.
+const addMonthsClamped = (date: Date, months: number): Date => {
+    const year = date.getUTCFullYear();
+    const targetMonth = date.getUTCMonth() + months;
+    const lastDayOfTargetMonth = new Date(Date.UTC(year, targetMonth + 1, 0)).getUTCDate();
+    return new Date(Date.UTC(year, targetMonth, Math.min(date.getUTCDate(), lastDayOfTargetMonth)));
+};
+
 const MIN_ANTICIPATION_DAYS = 60;
 const PRESENTATION_WINDOW_DAYS = 30;
+// Month-based rule for the max presentation date (pending legal confirmation;
+// the daily breakdown still uses the day-based constants above).
+const PRESENTATION_WINDOW_MONTHS = 1;
+const MIN_ANTICIPATION_MONTHS = 2;
 
 interface CalculationParams {
   arrivalDate: string;
@@ -103,7 +117,16 @@ export const calculateStudyStayBreakdown = (
         remainingPresentationDays: arr.length - index,
     }));
 
-    const maxPresentationDate = finalBreakdown[finalBreakdown.length - 1].presentationDate;
+    // Max presentation date under month-based computation: the earlier of
+    // (arrival + 1 month) and (exit − 2 months), each clamped to month end.
+    // Note it may differ from the last breakdown row, which still follows the
+    // day-based 30/60 rule until the month rule is legally confirmed.
+    const presentationLimitByArrival = addMonthsClamped(arrivalDate, PRESENTATION_WINDOW_MONTHS);
+    const presentationLimitByExit = addMonthsClamped(exitDate, -MIN_ANTICIPATION_MONTHS);
+    const maxPresentationDate =
+        presentationLimitByArrival.getTime() <= presentationLimitByExit.getTime()
+            ? presentationLimitByArrival
+            : presentationLimitByExit;
 
     return {
         arrivalDate,

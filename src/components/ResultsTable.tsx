@@ -41,6 +41,8 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ data, onReset }) => 
     );
   }
 
+  const flmpTime = data.maxPresentationDate.getTime();
+
   return (
     <div className="flex flex-col">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -67,12 +69,20 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ data, onReset }) => 
         </div>
       </div>
        <p className="text-xs text-slate-500 mt-2 mb-8 italic text-center md:text-left">
-         *La fecha límite es la que ocurra primero: 30 días desde la llegada o 60 días antes de la salida.
+         *La fecha límite es la que ocurra primero: 1 mes desde la llegada o 2 meses antes de la salida
+         (cómputo «de fecha a fecha»; si el día equivalente no existe, el último día del mes).
+         Pendiente de confirmación legal.
        </p>
 
       <h3 className="text-lg font-semibold text-white mb-2">Desglose Diario de Presentación</h3>
-      <p className="text-xs text-slate-500 mb-4 italic">
+      <p className="text-xs text-slate-500 mb-2 italic">
         *El "Rango de Fecha de Inicio del Curso" se basa en una estimación de 60 días desde la presentación, un plazo común pero no un requisito legal estricto. Revise siempre los requisitos específicos de su caso.
+      </p>
+      <p className="text-xs text-amber-400/90 mb-4 italic">
+        *El desglose sigue aún la regla anterior de 30/60 días. La fila resaltada en ámbar es la
+        fecha límite según el cómputo por meses; las filas atenuadas quedarían fuera de plazo bajo
+        esa regla. Si no hay fila resaltada, la fecha límite por meses es posterior a la última fila
+        y todo el desglose es válido.
       </p>
 
       {/* --- Responsive Table/Card List --- */}
@@ -91,9 +101,28 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ data, onReset }) => 
                 </tr>
               </thead>
               <tbody className="bg-slate-900/50 divide-y divide-slate-800">
-                {data.breakdown.map((row, index) => (
-                  <tr key={index} className="hover:bg-slate-800/60 transition-colors duration-150">
-                    <TableCell className="font-semibold">{formatDate(row.presentationDate)}</TableCell>
+                {data.breakdown.map((row, index) => {
+                  const isFlmpRow = row.presentationDate.getTime() === flmpTime;
+                  const isPastFlmp = row.presentationDate.getTime() > flmpTime;
+                  return (
+                  <tr
+                    key={index}
+                    className={`transition-colors duration-150 ${
+                      isFlmpRow
+                        ? 'bg-amber-400/15 ring-2 ring-inset ring-amber-400'
+                        : isPastFlmp
+                          ? 'opacity-40 bg-red-900/20 hover:bg-slate-800/60'
+                          : 'hover:bg-slate-800/60'
+                    }`}
+                  >
+                    <TableCell className="font-semibold">
+                      {formatDate(row.presentationDate)}
+                      {isFlmpRow && (
+                        <span className="ml-2 text-[10px] font-bold uppercase tracking-wider bg-amber-400 text-amber-950 rounded px-1.5 py-0.5 align-middle">
+                          Límite (meses)
+                        </span>
+                      )}
+                    </TableCell>
                     <TableCell>
                         <span className="inline-block text-center w-8 h-8 leading-8 rounded-full bg-slate-700 font-bold text-sky-300">
                             {row.remainingPresentationDays}
@@ -102,7 +131,8 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ data, onReset }) => 
                     <TableCell>{`${formatDate(row.courseStartDateMin)} - ${formatDate(data.exitDate)}`}</TableCell>
                     <TableCell>{row.remainingTouristDays}</TableCell>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -111,11 +141,30 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ data, onReset }) => 
 
       {/* Mobile Card View: Visible only on small screens, hidden from 'sm' up */}
       <div className="block sm:hidden space-y-3">
-        {data.breakdown.map((row, index) => (
-          <div key={index} className="bg-slate-800/70 p-4 rounded-lg border border-slate-700 shadow-md">
+        {data.breakdown.map((row, index) => {
+          const isFlmpRow = row.presentationDate.getTime() === flmpTime;
+          const isPastFlmp = row.presentationDate.getTime() > flmpTime;
+          return (
+          <div
+            key={index}
+            className={`p-4 rounded-lg border shadow-md ${
+              isFlmpRow
+                ? 'bg-amber-400/15 border-amber-400 ring-1 ring-amber-400'
+                : isPastFlmp
+                  ? 'bg-red-900/20 border-slate-700 opacity-40'
+                  : 'bg-slate-800/70 border-slate-700'
+            }`}
+          >
             {/* Top row: Presentation Date */}
             <div className="flex justify-between items-baseline pb-3 mb-3 border-b border-slate-700/50">
-              <span className="text-sm font-medium text-slate-400">Fecha Presentación</span>
+              <span className="text-sm font-medium text-slate-400">
+                Fecha Presentación
+                {isFlmpRow && (
+                  <span className="ml-2 text-[10px] font-bold uppercase tracking-wider bg-amber-400 text-amber-950 rounded px-1.5 py-0.5 align-middle">
+                    Límite (meses)
+                  </span>
+                )}
+              </span>
               <span className="text-base font-semibold text-white">{formatDate(row.presentationDate)}</span>
             </div>
 
@@ -139,7 +188,8 @@ export const ResultsTable: React.FC<ResultsTableProps> = ({ data, onReset }) => 
               </div>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
       
     </div>
