@@ -17,20 +17,26 @@ Format for each entry:
 
 - **STAYING LOCAL for now (owner, 2026-07-10):** commit locally, do **not** push to GitHub
   (pushing `main` deploys to production via Vercel).
-- **Branch/sync:** working branch is **`flmp-month-rule`** (the month-based FLMP demo for
-  the lawyer). `main` is **3 commits ahead** of `origin/main` (design handoff docs +
-  gitignore), unpushed on purpose.
+- **Branch/sync:** working branch is **`redesign`** (Phases 1–3 of
+  `.docs/IMPLEMENTATION-PLAN.md` DONE — light theme + live-results island shipped there,
+  carrying the month-rule demo). `flmp-month-rule` = the pre-redesign lawyer demo.
+  `main` is **3 commits ahead** of `origin/main` (design handoff docs + gitignore),
+  unpushed on purpose.
 - **App status:** Astro 7 + React 19 island app, deployed on Vercel (production still runs
-  the old 30/60-day FLMP). Gates: `pnpm test` (17 tests), `pnpm check` 0/0/0, `pnpm build`.
+  the old dark UI + 30/60-day FLMP). Gates: `pnpm test` (17 tests), `pnpm check` 0/0/0,
+  `pnpm build`.
 - **Package manager: `pnpm` only** — never `npm`/`yarn` (lockfile + Vercel depend on it).
-- **Next action when you return:** show the lawyer the local demo on `flmp-month-rule`
-  (both owner examples work — see the 2026-07-10 entry), collect his answers to the open
-  legal questions, then execute "Step B" (full 2-month consistency) and/or start the
-  redesign plan (`.docs/IMPLEMENTATION-PLAN.md`).
+- **Next action when you return:** lawyer answers → Step B (month-consistent table + copy);
+  owner lifts local-only hold → push, PR, client preview approval, merge, Vercel Web
+  Analytics (plan Phase 4.4–4.6). Phase 5 (email capture) still blocked on the domain.
 
 ### Open / pending items
 
-- [ ] **Lawyer review of the month-based FLMP rule** (demo ready on `flmp-month-rule`).
+- [ ] **Push + PR + client preview approval** when the owner lifts the local-only hold
+      (plan Phase 4.4–4.6: PR so `claude-code-review.yml` runs, client OK on the preview
+      URL before merge, then Vercel Web Analytics).
+- [ ] **Lawyer review of the month-based FLMP rule** (demo on `flmp-month-rule`, carried
+      into the `redesign` branch UI).
       Questions to resolve — see the 2026-07-10 entry: (a) does "1 mes desde la llegada"
       from 15/01 end 15/02 or 14/02 (implemented: 15/02, same day number); (b) month-end
       clamp 30/04 − 2 meses = 28/02 (owner-confirmed, verify legally); (c) does the
@@ -40,9 +46,9 @@ Format for each entry:
       consistency — breakdown rows end at the month-based FLMP, course ranges become
       "presentación + 2 meses", header/caption copy switches from 30/60 días to 1 mes /
       2 meses (also in the redesign mock strings), remove the demo highlight/legend.
-- [ ] **Execute the redesign** per `.docs/IMPLEMENTATION-PLAN.md` (handoff arrived
-      2026-07-05; decisions D1–D4 locked). Amended 2026-07-10: the FLMP rule change means
-      `calculationService.ts` is no longer frozen and the 30/60 copy will become months.
+- [x] ~~**Execute the redesign** per `.docs/IMPLEMENTATION-PLAN.md`~~ — Phases 1–3 done on
+      `redesign` (2026-07-10). Remaining from Phase 4: the push/PR/approval/analytics steps
+      above (blocked by local-only hold).
 - [ ] **Push everything** when the owner lifts the local-only hold (`main` + branch/PR).
 - [ ] **Decide on `origin/bump-node-24`** — remote branch bumping Node to 24 while
       `package.json` pins 22. Deferred while staying local (resolving it touches the remote).
@@ -50,6 +56,9 @@ Format for each entry:
 
 ### Recently completed (newest first)
 
+- [x] Redesign Phases 1–3 on `redesign`: shared `dateUtils`, token theme + fonts + light
+      shell, live-results island (no Calcular), native date inputs, new components; QA'd
+      at 1280/375; month-rule demo carried over. — 2026-07-10
 - [x] Month-based FLMP demo for the lawyer on `flmp-month-rule`; Vitest + 17 service
       tests; design handoff committed on `main` (local). — 2026-07-10
 - [x] Stage 2: static shell → native `.astro`; clean `astro check`; loading fallback;
@@ -86,6 +95,46 @@ Format for each entry:
 - **Domain logic is sacred:** all date math stays UTC; the 30/60-day rules live in
   `src/services/calculationService.ts` and are restated in `Header.astro` / `ResultsTable.tsx`
   — keep constants and copy in sync (see CLAUDE.md).
+
+---
+
+## 2026-07-10 — Redesign Phases 1–3: light theme + live-results island (branch `redesign`)
+
+**Done:**
+- **Phase 1 rest:** extracted all UTC date helpers to `src/utils/dateUtils.ts` (service
+  throwing parser + form `tryParse` variant + `isoToSpanish`/`spanishToIso` + long-date
+  formatter); components import from there; tests stayed green before/after.
+- **Phase 2:** Tailwind v4 `@theme` token block (HANDOFF §1.4), self-hosted
+  Newsreader/Public Sans (`@fontsource`, no Google CDN), light scrollbar, print rules,
+  meta description + `public/favicon.svg`, new 880px shell in `index.astro` (utility badge
+  "Herramienta orientativa · España"), restyled `Header`/`Disclaimer`, new `AdvisorCta.astro`
+  (button is a static placeholder), light island fallback skeleton.
+- **Phase 3:** island rewritten — **live results (D1)**: state lifted into `Calculator.tsx`,
+  derived via `useMemo`, no Calcular button; **native date inputs (D4)** with ISO→dd/mm/aaaa
+  conversion at the boundary; new `StatusBanner` (incomplete/error/success, `aria-live`),
+  `WaitingCard`, `ResultsSummary` (navy hero with long Spanish date, days-available chip,
+  governing-rule note derived via `addMonthsClamped` comparison, 2 stat cards, 4-milestone
+  timeline, **Descargar PDF** + **Compartir enlace** with toast), collapsible `ResultsTable`
+  (zebra desktop table / mobile stacked cards, red pill ≤7 days) **keeping the amber
+  month-rule highlight + dimmed rows** for the lawyer demo. Deleted `CalendarPicker.tsx`
+  (with its DOM style-injection) and `FormLayout.tsx`; new inline-SVG icon set.
+- Copy decisions: legal copy (header subtitle, disclaimer, course-estimation caption,
+  "Próximamente") kept **verbatim from the current app**; new UI strings verbatim from the
+  mock's `es` set, **except** month-rule wording where the deadline itself is described
+  (governing note "plazo de 1 mes / margen de 2 meses", milestone-1 desc) — pending legal
+  confirmation, see the FLMP entry below.
+- Lead CTA renders only PDF/Share; the email form slots in later (plan Phase 5).
+
+**Verified:** `pnpm test` 17/17; `pnpm check` 0/0/0; `pnpm build` with exactly one
+`<astro-island>` in `dist/index.html`; browser QA at 1280 and 375px: waiting → success
+(both owner examples: 14/02 hero + no highlight beyond table; 28/02 highlighted + 01/03
+dimmed) → error (45-day stay, service message in red banner) → share toast; mobile stacked
+cards, no horizontal scroll.
+
+**Pending:** plan Phase 4.4–4.6 (push branch, PR, client preview approval, merge, Vercel
+Web Analytics) — blocked by the local-only hold. Known demo tension until Step B: hero says
+"31 días disponibles" (month rule) while the table shows 30 day-based rows; the amber
+caption explains it.
 
 ---
 
