@@ -19,6 +19,20 @@
 | D3 | Lead-gen | **PDF + Share in the redesign PR; email capture as its own follow-up phase.** Implement "Descargar PDF" (`window.print()` + print styles) and "Compartir enlace" (clipboard + toast) in Phase 3. Advisor CTA = static block. Email capture ("Enviar a mi correo") is IN scope but ships separately with its privacy/compliance work — see **Phase 5**. *(Amended by owner 2026-07-05; originally deferred.)* |
 | D4 | Date inputs | **Native `<input type="date">`** per the mock. Delete `CalendarPicker.tsx`. Convert values at the form boundary (`yyyy-mm-dd` → `dd/mm/aaaa`) before calling the service. |
 
+> **AMENDMENT (owner, 2026-07-10) — month-based FLMP.** The owner changed the deadline
+> rule: `maxPresentationDate` is now the earlier of **(arrival + 1 month)** and
+> **(exit − 2 months)**, computed "de fecha a fecha" with month-end clamping — no longer
+> min(arrival+29d, exit−60d). Implemented on branch `flmp-month-rule` together with the
+> Phase-1 Vitest safety net (pulled forward; 17 tests exist). The daily breakdown is still
+> day-based pending the lawyer's confirmation (demo highlights the month-rule row); "Step B"
+> makes the table fully month-consistent — see WORKLOG 2026-07-10 for the open legal
+> questions. **Consequences for this plan:** the "never modify calculationService" rule
+> below is softened to "no behavior changes beyond the confirmed month rule, always
+> test-covered"; Phase 1.1–1.2 are done; every place the redesign restates "30 días / 60
+> días" (Header copy, result captions, mock `es` strings, Phase 3/4 QA numbers) must use
+> the month wording instead once the lawyer confirms. Also: repo is in **local-only mode**
+> (no pushes) per the owner, so Phase 0.2/0.3 (push, bump-node-24) are on hold.
+
 ## Hard rules (from CLAUDE.md / HANDOFF §7 — violations = failed task)
 
 - **Never modify `src/services/calculationService.ts`.** Do not port the mock's inline JS date

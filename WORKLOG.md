@@ -11,34 +11,47 @@ Format for each entry:
 
 ---
 
-## ▶ Resume here (state as of 2026-06-24)
+## ▶ Resume here (state as of 2026-07-10)
 
 > Read this first after a restart. Quick "where we are / where we left off".
 
-- **Branch/sync:** on `main`, HEAD = `df07341`, **fully pushed** (`origin/main` is in sync,
-  0 ahead / 0 behind). Working tree clean.
-- **App status:** Astro 7 + React 19 island app. **Done and deployed.** Stage 1 (migration)
-  and Stage 2 (static shell → `.astro`) both shipped to production via Vercel (push to
-  `main` auto-deploys). `pnpm check` is clean (0/0/0); `pnpm build` passes.
+- **STAYING LOCAL for now (owner, 2026-07-10):** commit locally, do **not** push to GitHub
+  (pushing `main` deploys to production via Vercel).
+- **Branch/sync:** working branch is **`flmp-month-rule`** (the month-based FLMP demo for
+  the lawyer). `main` is **3 commits ahead** of `origin/main` (design handoff docs +
+  gitignore), unpushed on purpose.
+- **App status:** Astro 7 + React 19 island app, deployed on Vercel (production still runs
+  the old 30/60-day FLMP). Gates: `pnpm test` (17 tests), `pnpm check` 0/0/0, `pnpm build`.
 - **Package manager: `pnpm` only** — never `npm`/`yarn` (lockfile + Vercel depend on it).
-- **Next action when you return:** confirm the latest Vercel production deploy went green,
-  then handle the open items below.
-- **In flight: UX/UI redesign.** The user is working with **Claude Design** (separate, no
-  repo access) on a new look. Handoff spec lives in **`DESIGN-BRIEF.md`** (repo root) — it's
-  self-contained for the designer. When the proposal returns, **we adapt it into Astro here**
-  (see DESIGN-BRIEF.md §7 "Internal implementation notes" for where each piece lands).
+- **Next action when you return:** show the lawyer the local demo on `flmp-month-rule`
+  (both owner examples work — see the 2026-07-10 entry), collect his answers to the open
+  legal questions, then execute "Step B" (full 2-month consistency) and/or start the
+  redesign plan (`.docs/IMPLEMENTATION-PLAN.md`).
 
 ### Open / pending items
 
-- [ ] **Adapt the Claude Design UX/UI proposal into the app** when it arrives. Source of
-      truth for constraints + file mapping: `DESIGN-BRIEF.md`. Presentation only — never
-      touch `calculationService.ts` or the Spanish copy/rules. Tailwind **v4** (`@theme`,
-      no config). Verify `pnpm check` 0/0/0 + `pnpm build`.
-- [ ] **Decide on `origin/bump-node-24`** — open remote branch bumping Node to 24 while
-      `package.json` `engines` + Vercel pin Node **22**. Merge (and re-pin to 24) or delete.
+- [ ] **Lawyer review of the month-based FLMP rule** (demo ready on `flmp-month-rule`).
+      Questions to resolve — see the 2026-07-10 entry: (a) does "1 mes desde la llegada"
+      from 15/01 end 15/02 or 14/02 (implemented: 15/02, same day number); (b) month-end
+      clamp 30/04 − 2 meses = 28/02 (owner-confirmed, verify legally); (c) does the
+      course-start minimum also become 2 months; (d) short-stay edge where exit − 2 meses
+      falls before the arrival date.
+- [ ] **Step B after lawyer confirms (owner decision 2026-07-10):** full 2-month
+      consistency — breakdown rows end at the month-based FLMP, course ranges become
+      "presentación + 2 meses", header/caption copy switches from 30/60 días to 1 mes /
+      2 meses (also in the redesign mock strings), remove the demo highlight/legend.
+- [ ] **Execute the redesign** per `.docs/IMPLEMENTATION-PLAN.md` (handoff arrived
+      2026-07-05; decisions D1–D4 locked). Amended 2026-07-10: the FLMP rule change means
+      `calculationService.ts` is no longer frozen and the 30/60 copy will become months.
+- [ ] **Push everything** when the owner lifts the local-only hold (`main` + branch/PR).
+- [ ] **Decide on `origin/bump-node-24`** — remote branch bumping Node to 24 while
+      `package.json` pins 22. Deferred while staying local (resolving it touches the remote).
+- [ ] **Domain purchase** (owner choosing a name) — hard prerequisite for redesign Phase 5.
 
 ### Recently completed (newest first)
 
+- [x] Month-based FLMP demo for the lawyer on `flmp-month-rule`; Vitest + 17 service
+      tests; design handoff committed on `main` (local). — 2026-07-10
 - [x] Stage 2: static shell → native `.astro`; clean `astro check`; loading fallback;
       pnpm standardized in docs. Pushed (`df07341`). — 2026-06-24
 - [x] Astro migration (PR #1, merged); workflows pushed; installer branch deleted; `main`
@@ -73,6 +86,45 @@ Format for each entry:
 - **Domain logic is sacred:** all date math stays UTC; the 30/60-day rules live in
   `src/services/calculationService.ts` and are restated in `Header.astro` / `ResultsTable.tsx`
   — keep constants and copy in sync (see CLAUDE.md).
+
+---
+
+## 2026-07-10 — Month-based FLMP (demo for the lawyer) + Vitest safety net
+
+**Done:**
+- Committed the design handoff (`.docs/handoff/` + `.docs/IMPLEMENTATION-PLAN.md`) and the
+  `.vercelignore`/`DESIGN-BRIEF.md` pending changes on `main` (`74ddb8f`, local only).
+- On branch **`flmp-month-rule`**: added **Vitest** (`pnpm test`) with 17 tests in
+  `src/services/calculationService.test.ts` — 12 lock the current day-based behavior
+  (validation errors, breakdown invariants, duration/exit-mode equivalence, DST
+  insensitivity), 5 encode the new month rule including both owner examples.
+- **Changed the FLMP rule** in `calculationService.ts` (owner instruction 2026-07-10):
+  `maxPresentationDate` = the earlier of **(llegada + 1 mes)** and **(salida − 2 meses)**,
+  computed "de fecha a fecha" (Ley 39/2015 style) with a new UTC `addMonthsClamped` helper —
+  when the equivalent day doesn't exist (30/02), it clamps to the last day of the month.
+  Verified: 15/01/2026 + 90 días → FLMP **14/02/2026** (was 13/02); 31/01/2026 →
+  30/04/2026 → FLMP **28/02/2026** (was 01/03).
+- **Breakdown table left day-based on purpose** (owner decision, for the lawyer demo):
+  the row equal to the month-based FLMP is highlighted in amber with a "Límite (meses)"
+  badge, rows after it are dimmed, and captions explain the month rule + "pendiente de
+  confirmación legal". When the month-based FLMP is later than the last row (example 1),
+  nothing is highlighted and the legend says all rows are valid.
+
+**Why:** the owner discovered the legal deadline is computed in calendar months, not fixed
+days, and wants the lawyer to validate the new rule on a working demo before making the
+table fully consistent (Step B) — production stays on the old rule meanwhile (no push).
+
+**Verified:** `pnpm test` 17/17, `pnpm check` 0/0/0, `pnpm build` OK; both owner examples
+driven in the browser (desktop table + highlight confirmed visually).
+
+**Pending / questions for the lawyer** (carry until answered):
+1. "1 mes desde la llegada": llegada 15/01 → ¿vence el **15/02** (implemented — same day
+   number) o el 14/02?
+2. Month-end clamp: 30/04 − 2 meses = **28/02** (owner example; confirm legally).
+3. Does the **course-start minimum** (today "presentación + 60 días") also become
+   **2 meses**? Drives the Step-B table ranges.
+4. Short-stay edge: e.g. llegada 01/08, salida 30/09 → salida − 2 meses = 30/07, **before
+   arrival**, while the 60-day rule still allows filing on 01/08. What should the tool say?
 
 ---
 
