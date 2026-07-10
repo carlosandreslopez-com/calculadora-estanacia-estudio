@@ -15,8 +15,13 @@ Format for each entry:
 
 > Read this first after a restart. Quick "where we are / where we left off".
 
-- **STAYING LOCAL for now (owner, 2026-07-10):** commit locally, do **not** push to GitHub
-  (pushing `main` deploys to production via Vercel).
+- **Hold partially lifted (owner, 2026-07-10):** the `redesign` branch is pushed — **PR #3**
+  (https://github.com/carlosandreslopez-com/calculadora-estanacia-estudio/pull/3) with a
+  **Vercel preview**: https://calculadora-estanacia-estud-git-31d816-carlos-projects-3ac98b90.vercel.app
+  ⚠️ The preview sits behind **Vercel Authentication** (default deployment protection) — to
+  share it with the client/lawyer, either disable it (Vercel dashboard → project → Settings →
+  Deployment Protection) or use the deployment's "Share" link. `main` itself stays
+  **unpushed** (pushing it deploys production).
 - **Branch/sync:** working branch is **`redesign`** (Phases 1–3 of
   `.docs/IMPLEMENTATION-PLAN.md` DONE — light theme + live-results island shipped there,
   carrying the month-rule demo). `flmp-month-rule` = the pre-redesign lawyer demo.
@@ -32,9 +37,13 @@ Format for each entry:
 
 ### Open / pending items
 
-- [ ] **Push + PR + client preview approval** when the owner lifts the local-only hold
-      (plan Phase 4.4–4.6: PR so `claude-code-review.yml` runs, client OK on the preview
-      URL before merge, then Vercel Web Analytics).
+- [ ] **Client approval on the preview URL** (PR #3 is open, preview deployed — see the
+      resume block; unblock sharing by adjusting Deployment Protection). After the OK:
+      merge, verify the production deploy, note the previous deployment as the
+      Instant-Rollback point, then add Vercel Web Analytics (plan Phase 4.5–4.6).
+- [ ] **Retune `.github/workflows/claude-code-review.yml`** — its prompt still describes
+      the pre-redesign app (Tailwind Play CDN + SRI, duplicated date helpers, Header.tsx):
+      update to the new architecture (dateUtils, tokens/@theme, month-based FLMP).
 - [ ] **Lawyer review of the month-based FLMP rule** (demo on `flmp-month-rule`, carried
       into the `redesign` branch UI).
       Questions to resolve — see the 2026-07-10 entry: (a) does "1 mes desde la llegada"
