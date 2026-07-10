@@ -37,7 +37,7 @@ The rules are covered by tests in `src/services/calculationService.test.ts` — 
 
 ### Date handling (important)
 
-All date math is done in **UTC** to avoid timezone drift (`Date.UTC`, `getUTCDate`, etc.). Dates are parsed from and formatted to `dd/mm/yyyy`. The parse/format/diff helpers are duplicated between `src/services/calculationService.ts` and `src/components/DataEntryForm.tsx` — keep both copies consistent if you touch them.
+All date math is done in **UTC** to avoid timezone drift (`Date.UTC`, `getUTCDate`, etc.). Dates are parsed from and formatted to `dd/mm/yyyy`. The shared helpers live in `src/utils/dateUtils.ts` (`parseSpanishDateUTC` throws Spanish errors — the service contract; `tryParseSpanishDateUTC` returns `null` for live form input; plus `formatDateToSpanish`, `diffInDays`, `addDays`, `addMonthsClamped`, and the `isoToSpanish`/`spanishToIso` boundary converters for native date inputs). Don't re-declare date helpers in components — import from there.
 
 ## Architecture
 

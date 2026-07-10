@@ -1,48 +1,5 @@
 import type { BreakdownRow, CalculationResult } from '../types.ts';
-
-// Helper to add days to a date, avoiding timezone issues by working in UTC
-const addDays = (date: Date, days: number): Date => {
-    const result = new Date(date);
-    result.setUTCDate(result.getUTCDate() + days);
-    return result;
-};
-
-// Helper to parse date string from 'DD/MM/YYYY' format into a UTC Date object
-const parseSpanishDateUTC = (dateString: string): Date => {
-    if (!dateString) {
-        throw new Error('La fecha es obligatoria.');
-    }
-    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
-        throw new Error(`Formato de fecha inválido: "${dateString}". Use dd/mm/aaaa.`);
-    }
-    
-    const parts = dateString.split('/').map(part => parseInt(part, 10));
-    const [day, month, year] = parts;
-
-    const date = new Date(Date.UTC(year, month - 1, day));
-
-    if (isNaN(date.getTime()) || date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
-        throw new Error(`Fecha inválida: "${dateString}". Verifique el día y el mes.`);
-    }
-    return date;
-};
-
-
-const diffInDays = (date1: Date, date2: Date): number => {
-    const msPerDay = 1000 * 60 * 60 * 24;
-    // Calculate the difference in milliseconds and convert to days
-    return Math.round((date1.getTime() - date2.getTime()) / msPerDay);
-};
-
-// Month-based deadline arithmetic ("de fecha a fecha", Ley 39/2015): the deadline
-// falls on the same day number in the target month; if that day does not exist
-// (e.g. 30/02), it clamps to the last day of that month. Works in UTC.
-const addMonthsClamped = (date: Date, months: number): Date => {
-    const year = date.getUTCFullYear();
-    const targetMonth = date.getUTCMonth() + months;
-    const lastDayOfTargetMonth = new Date(Date.UTC(year, targetMonth + 1, 0)).getUTCDate();
-    return new Date(Date.UTC(year, targetMonth, Math.min(date.getUTCDate(), lastDayOfTargetMonth)));
-};
+import { addDays, addMonthsClamped, diffInDays, parseSpanishDateUTC } from '../utils/dateUtils.ts';
 
 const MIN_ANTICIPATION_DAYS = 60;
 const PRESENTATION_WINDOW_DAYS = 30;

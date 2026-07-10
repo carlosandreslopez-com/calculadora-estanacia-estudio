@@ -1,19 +1,12 @@
 import React from 'react';
 import type { CalculationResult } from '../types.ts';
 import { RefreshIcon, DocumentIcon, CalendarIcon } from './IconComponents.tsx';
+import { formatDateToSpanish as formatDate } from '../utils/dateUtils.ts';
 
 interface ResultsTableProps {
   data: CalculationResult | null;
   onReset: () => void;
 }
-
-const formatDate = (date: Date): string => {
-    // Pad with leading zeros if needed
-    const day = String(date.getUTCDate()).padStart(2, '0');
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0'); // Month is 0-indexed
-    const year = date.getUTCFullYear();
-    return `${day}/${month}/${year}`;
-};
 
 const TableHeader: React.FC<{ children: React.ReactNode }> = ({ children }) => (
     <th scope="col" className="px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{children}</th>

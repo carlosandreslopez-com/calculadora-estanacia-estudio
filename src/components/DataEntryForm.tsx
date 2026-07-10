@@ -2,37 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { CalculatorIcon, ErrorIcon, CalendarIcon } from './IconComponents.tsx';
 import { CalendarPicker } from './CalendarPicker.tsx';
 import { FormLayout } from './FormLayout.tsx';
-
-// Helper to parse date string from 'DD/MM/YYYY' format into a UTC Date object
-const parseSpanishDateUTC = (dateString: string): Date | null => {
-    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(dateString)) {
-        return null;
-    }
-    const parts = dateString.split('/').map(part => parseInt(part, 10));
-    const [day, month, year] = parts;
-    
-    const date = new Date(Date.UTC(year, month - 1, day));
-    
-    if (isNaN(date.getTime()) || date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) {
-        return null;
-    }
-    return date;
-};
-
-// Helper to format a Date object to a "dd/mm/yyyy" string
-const formatDateToSpanish = (date: Date): string => {
-    const day = String(date.getUTCDate()).padStart(2, '0');
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-    const year = date.getUTCFullYear();
-    return `${day}/${month}/${year}`;
-};
-
-
-// Helper to calculate difference in days between two UTC dates
-const diffInDays = (date1: Date, date2: Date): number => {
-    const msPerDay = 1000 * 60 * 60 * 24;
-    return Math.round((date1.getTime() - date2.getTime()) / msPerDay);
-};
+import { diffInDays, formatDateToSpanish, tryParseSpanishDateUTC } from '../utils/dateUtils.ts';
 
 interface DataEntryFormProps {
     onCalculate: (params: { arrivalDate: string; stayDuration?: string; exitDate?: string; }) => boolean;
@@ -52,8 +22,8 @@ export const DataEntryForm: React.FC<DataEntryFormProps> = ({ onCalculate, error
 
     useEffect(() => {
         if (mode === 'date' && arrivalDate && exitDate) {
-            const parsedArrival = parseSpanishDateUTC(arrivalDate);
-            const parsedExit = parseSpanishDateUTC(exitDate);
+            const parsedArrival = tryParseSpanishDateUTC(arrivalDate);
+            const parsedExit = tryParseSpanishDateUTC(exitDate);
 
             if (parsedArrival && parsedExit && parsedExit.getTime() >= parsedArrival.getTime()) {
                 const duration = diffInDays(parsedExit, parsedArrival) + 1;
@@ -156,7 +126,7 @@ export const DataEntryForm: React.FC<DataEntryFormProps> = ({ onCalculate, error
                             </button>
                             {isArrivalPickerOpen && (
                                 <CalendarPicker
-                                    currentDate={parseSpanishDateUTC(arrivalDate)}
+                                    currentDate={tryParseSpanishDateUTC(arrivalDate)}
                                     onSelectDate={handleSelectArrivalDate}
                                     onClose={() => setArrivalPickerOpen(false)}
                                 />
@@ -203,7 +173,7 @@ export const DataEntryForm: React.FC<DataEntryFormProps> = ({ onCalculate, error
                                     </button>
                                     {isExitPickerOpen && (
                                         <CalendarPicker
-                                            currentDate={parseSpanishDateUTC(exitDate)}
+                                            currentDate={tryParseSpanishDateUTC(exitDate)}
                                             onSelectDate={handleSelectExitDate}
                                             onClose={() => setExitPickerOpen(false)}
                                         />
