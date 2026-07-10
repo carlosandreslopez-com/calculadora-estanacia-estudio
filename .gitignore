@@ -24,6 +24,9 @@ dist-ssr
 .astro/
 .vercel/
 
+# Playwright MCP browser-session artifacts
+.playwright-mcp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
