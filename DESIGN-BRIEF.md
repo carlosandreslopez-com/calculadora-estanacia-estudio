@@ -141,10 +141,3 @@ In rough priority:
 - **Do not touch** `src/services/calculationService.ts` (UTC date math, 30/60-day rules) —
   presentation only. If a new font is added, load it in `Layout.astro` and define tokens in
   `global.css`. Verify with `pnpm check` (0/0/0) + `pnpm build`. **pnpm only.**
-
-What to tell Claude Design (the short version to say out loud)
-
-1. It's a Spanish-only, single-page immigration-deadline calculator; keep all copy and the 30/60-day rules — visuals only.
-2. Mobile-first, high-contrast, trustworthy "officessed and often on phones.
-3. Deliver design tokens + mockups for every state at mobile & desktop, assets as files, and (ideally) utility-class/token output, not just a picture.
-4. It won't touch our code — we adapt the proposal here.
